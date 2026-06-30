@@ -1,0 +1,94 @@
+PRODUCT REQUIREMENTS DOCUMENT (PRD) & IMPLEMENTATION PLAN  
+Nama Proyek:  PasarPintar AI Kompetisi:  Hackathon BYTESFEST 2026 (Universitas Sebelas 
+Maret) Tema SDGs:  SDG 8 - Decent Work and Economic Growth  (Pekerjaan Layak dan 
+Pertumbuhan Ekonomi)  
+A. Ringkasan Eksekutif & Objektif  
+Masalah:  Pedagang UMKM di Solo Raya kesulitan memantau harga bahan baku, tren 
+konsumen, dan bersaing dengan toko online besar karena keterbatasan akses data. 
+Solusi: PasarPintar AI adalah asisten kecerdasan buatan dan dashboard  analitik yang 
+meratakan lapangan bermain bagi pedagang lokal, memberikan wawasan harga pasar real-
+time dan rekomendasi bisnis. Tujuan Hackathon:  Membangun Minimum Viable Product  
+(MVP) yang solid, anti -bug, dan memiliki flow demo yang mulus sebelum jam 12.00 di hari 
+H, sehingga siap mengintegrasikan 2 constraint  kejutan dari panitia.  
+B. Spesifikasi Fitur (Scope of Work)  
+Fitur dibagi berdasarkan prioritas eksekusi untuk manajemen waktu saat Hackathon Day : 
+1. Fitur MVP (WAJIB - Selesai sebelum 12.30)  
+• AI Chat Assistant:  Asisten AI berbasis NLP/LLM tempat pedagang bisa bertanya 
+(misal: "Berapa harga wajar kain batik cap minggu ini?"). AI akan merangkum tren 
+dan menjawab menggunakan data lokal.  
+• Dashboard Harga Pasar:  Visualisasi grafik harga mingguan per kategori produk 
+(batik, kerajinan, pangan) yang bisa difilter.  
+• Rekomendasi Waktu Jual:  Sistem analitik berdasarkan pola harga historis yang 
+merekomendasikan kapan waktu terbaik bagi pedagang untuk menjual stoknya 
+(misal: harga sedang naik).  
+2. Fitur "Bagus Punya" (Dikerjakan jika waktu sisa/setelah constraint ) 
+• Generator Deskripsi Produk:  Fitur otomatisasi copywriting  untuk jualan online 
+hanya dengan input nama dan foto produk.  
+• Alert Harga Anomali:  Notifikasi jika ada kenaikan atau penurunan harga pasar yang 
+signifikan.  
+3. Fitur Bonus  
+• Bandingkan Kompetitor:  Menampilkan perbandingan harga produk pedagang 
+versus penjual lain di platform e-commerce . 
+---PAGE BREAK---
+C. Arsitektur Sistem & Tech Stack  
+Sistem menggunakan arsitektur modular agar siap menerima constraint  teknis tanpa 
+merombak kode utama.  
+• Frontend:  Next.js 14 (App Router) + Tailwind CSS. Bertugas mengurus UI 
+Dashboard, Chat Assistant, dan visualisasi grafik harga.  
+• Backend / API Layer:  FastAPI (Python). Berfungsi sebagai REST endpoints, 
+orkestrasi AI, scraping, dan analitik.  
+• AI Layer:  Groq / Claude API (Llama -3.1-70b / Mixtral). Dipilih karena latensinya yang 
+sangat rendah, penting untuk kecepatan respons saat demo di depan juri.  
+• Data Layer:  Supabase (PostgreSQL). Menyimpan riwayat chat, data produk, dan 
+harga historis.  
+• Scraper (Semi -Static Strategy):  BeautifulSoup / Playwright. Data scraping dari 
+Tokopedia/Shopee dan referensi pasar lokal dilakukan sebelum hari H lomba  untuk 
+menghindari pemblokiran anti-bot, lalu disimpan di Supabase untuk di -query via 
+API.  
+• Analitik:  Pandas + Recharts untuk menghitung moving average  dan tren harga 
+mingguan.  
+• Deployment:  Vercel (untuk Frontend Next.js) dan Railway (untuk Backend FastAPI) 
+agar setup cepat dan gratis.  
+D. Rencana Implementasi & Strategi (Hackathon Day - 23 Juli 2026)  
+Pelaksanaan dipusatkan di Gedung G FKIP UNS. Kunci keberhasilan adalah pembagian 
+peran (Satu orang fokus Frontend, satu orang fokus Backend/AI).  
+• 09.30 - 10.00: Menerima Constraint 1 (Teknis -Fungsional)  dari panitia. Evaluasi 
+dampaknya terhadap arsitektur modular yang sudah disiapkan.  
+• 10.00 - 12.30 (Fokus MVP):  Abaikan fitur bonus. Selesaikan 3 fitur wajib (Chat, 
+Dashboard, Rekomendasi). Pastikan ini berjalan 100% sempurna.  
+• 13.00 - 13.30: Menerima Constraint 2 (Kontekstual) . Lakukan diskusi cepat selama 
+10 menit untuk mencari celah integrasi termudah.  
+• 13.30 - 16.00 (Polish & Integrasi):  Integrasikan Constraint 2. Sisa waktu digunakan 
+hanya untuk merapikan UI dan memastikan alur demo mulus. Jangan menambah 
+fitur baru.  
+---PAGE BREAK---
+• 16.00 - Selesai: Menghentikan pengembangan, melakukan push kode terakhir ke 
+GitHub repositori, dan submit output akhir ke panitia. Selesai ini, fokus beralih ke 
+persiapan slide presentasi.  
+E. Strategi Pitching & Demo (Pitching Day - 24 Juli 2026)  
+Dilaksanakan pada 24 Juli dengan struktur 5 menit yang berpusat pada storytelling : 
+1. 0:00 - 0:45 (Hook):  Buka dengan cerita "Pak Budi", penjual batik Pasar Klewer 
+selama 20 tahun yang kebingungan memantau harga wajar di era digital.  
+2. 0:45 - 1:30 (Solusi):  Perkenalkan PasarPintar AI sebagai asisten kecerdasan buatan 
+khusus UMKM Solo Raya.  
+3. 1:30 - 3:00 (Demo Live):  Lakukan 1 alur demo yang berkesinambungan (Tanya harga 
+di chat -> lihat tren di dashboard  -> buat deskripsi produk untuk dijual). Fokus pada 
+transisi yang mulus.  
+4. 3:00 - 4:00 (Dampak & SDG):  Tekankan bahwa ada 160.000 UMKM di Solo Raya 
+yang terbantu. Hubungkan langsung dengan SDG 8 (memastikan digitalisasi tidak 
+meninggalkan pedagang kecil).  
+5. 4:00 - 5:00 (Closing & QnA):  Tutup dengan pernyataan kuat: "Ini adalah teman 
+bisnis digital pertama yang bicara bahasa pedagang lokal." Bersiap menjawab 
+pertanyaan juri soal akurasi data dan skalabilitas.  
+F. Metrik Sukses & Penilaian Juri  
+Berdasarkan panduan BYTESFEST, poin yang harus dimaksimalkan:  
+• Integrasi Constraint:  Seberapa dalam dan adaptif tim memasukkan 2 constraint 
+kejutan ke dalam solusi.  
+• Kualitas & Fungsionalitas (Proyeksi Skor 80%):  Produk berjalan mulus tanpa bug 
+saat demonstrasi.  
+• Pitching (Proyeksi Skor 95%):  Kejelasan penyampaian, storytelling , dan 
+kemampuan menjawab pertanyaan juri dengan percaya diri.  
+• Relevansi & Dampak (Proyeksi Skor 92%):  Kekuatan korelasi solusi dengan SDG 8 
+dan efektivitas menyelesaikan masalah UMKM Solo  
+ 
+---PAGE BREAK---
