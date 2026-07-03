@@ -64,6 +64,65 @@ async def get_categories():
     ]
 
 
+@router.get("/stream")
+async def live_prices_stream(
+    category: str = Query(None, description="Filter by category")
+):
+    """
+    Server-Sent Events (SSE) endpoint to push live price updates.
+    Checks the background worker state and broadcasts new data.
+    """
+    from fastapi.responses import StreamingResponse
+    import asyncio
+    import worker
+    import json
+    from services.price_service import get_price_summary, get_price_history, get_alerts
+    from services.recommendation_service import get_recommendations
+
+    from database.connection import async_session
+    import json
+    from fastapi.encoders import jsonable_encoder
+
+    async def get_all_dashboard_data(session: AsyncSession):
+        summaries = await get_price_summary(session, category)
+        recs = await get_recommendations(session, category)
+        alerts = await get_alerts(session, False)
+        history = await get_price_history(session, None, category, 12, None)
+        
+        return {
+            "summaries": jsonable_encoder(summaries),
+            "recs": jsonable_encoder(recs),
+            "alerts": jsonable_encoder(alerts),
+            "history": jsonable_encoder(history)
+        }
+
+    async def event_generator():
+        try:
+            print(f"[SSE] Starting stream for category: {category}")
+            # Fetch and send initial data
+            async with async_session() as db_session:
+                initial_data = await get_all_dashboard_data(db_session)
+                yield f"data: {json.dumps(initial_data)}\n\n"
+            
+            # Loop for updates
+            while True:
+                await asyncio.sleep(2)
+                if worker.has_new_data:
+                    print(f"[SSE] Broadcasting new live data for {category or 'all'}...")
+                    async with async_session() as db_session:
+                        new_data = await get_all_dashboard_data(db_session)
+                    yield f"data: {json.dumps(new_data)}\n\n"
+                    worker.has_new_data = False # reset flag
+        except asyncio.CancelledError:
+            print("[SSE] Client disconnected")
+            raise
+        except Exception as e:
+            print(f"[SSE] Error in generator: {e}")
+            yield f"event: error\ndata: {str(e)}\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+
 @router.get("/sources")
 async def get_sources():
     """Get available price data sources."""

@@ -18,6 +18,8 @@ load_dotenv()
 # Import database
 from database.connection import init_db, async_session
 from database.seed_data import seed_database
+import asyncio
+from worker import background_market_worker
 
 # Import routers
 from routers.chat import router as chat_router
@@ -27,6 +29,7 @@ from routers.descriptions import router as descriptions_router
 from routers.alerts import router as alerts_router
 from routers.auth import router as auth_router
 from routers.routes import router as routes_router
+from routers.marketplace import router as marketplace_router
 from fastapi.staticfiles import StaticFiles
 
 # Create static directory if it doesn't exist
@@ -45,6 +48,10 @@ async def lifespan(app: FastAPI):
     async with async_session() as session:
         await seed_database(session)
 
+    # Start the Live Data Background Worker
+    worker_task = asyncio.create_task(background_market_worker())
+    app.state.worker_task = worker_task
+
     print("[OK] PasarPintar AI Backend is ready!")
     print("[DOCS] API docs available at: http://localhost:8000/docs")
 
@@ -52,6 +59,7 @@ async def lifespan(app: FastAPI):
 
     # === SHUTDOWN ===
     print("[STOP] Shutting down PasarPintar AI Backend...")
+    app.state.worker_task.cancel()
 
 
 # Create FastAPI app
@@ -90,6 +98,7 @@ app.include_router(descriptions_router)
 app.include_router(alerts_router)
 app.include_router(auth_router)
 app.include_router(routes_router)
+app.include_router(marketplace_router)
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")

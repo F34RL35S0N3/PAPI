@@ -79,26 +79,31 @@ async def send_message(request: ChatRequest, db: AsyncSession = Depends(get_db))
     search_keywords = ["cari", "butuh", "pesan", "beli", "ready"]
     products_payload = None
     
-    if any(k in msg_lower for k in search_keywords) and len(request.message) > 10:
-        # Simple semantic search simulation: query products
-        # We find products matching words in the message
+    if any(k in msg_lower for k in search_keywords) and len(request.message) > 5:
+        # We find products in the database
         result = await db.execute(
             select(LocalProduct)
             .join(LocalShop)
             .options(selectinload(LocalProduct.shop))
-            .limit(3)
+            .limit(50)  # get up to 50 products
         )
         products = result.scalars().all()
         
-        # Filter products in python for simple MVP text match
+        # Filter products
         matched = []
+        is_general_search = "produk lokal" in msg_lower or request.message.strip() == "Cari produk lokal terdekat"
+        
         for p in products:
-            if p.name.lower() in msg_lower or p.category.lower() in msg_lower or p.shop.district.lower() in msg_lower:
+            if is_general_search:
                 matched.append(p)
+            else:
+                # Simple semantic search simulation for specific queries
+                if any(word in p.name.lower() or word in p.category.lower() or word in p.shop.district.lower() for word in msg_lower.split()):
+                    matched.append(p)
                 
-        # If no strict match, just return top 3 to ensure demo works
+        # If no strict match, just return some to ensure demo works
         if not matched and products:
-            matched = products[:3]
+            matched = products[:5]
             
         if matched:
             products_payload = []
@@ -121,9 +126,9 @@ async def send_message(request: ChatRequest, db: AsyncSession = Depends(get_db))
                     }
                 })
             
-            # Inject matchmaker context to AI
-            price_context += "\n\n[SISTEM MATCHMAKER]: Anda menemukan UMKM lokal berikut. Beritahu pengguna bahwa Anda menemukan penjual yang relevan dan tampilkan daftarnya secara singkat.\n"
-            for p in products_payload:
+            # Inject matchmaker context to AI (limit to top 10 to avoid huge prompts)
+            price_context += "\n\n[SISTEM MATCHMAKER]: Anda menemukan UMKM lokal berikut. Beritahu pengguna bahwa Anda menemukan penjual yang relevan (sebutkan beberapa) dan tampilkan daftarnya secara singkat.\n"
+            for p in products_payload[:10]:
                 price_context += f"- {p['name']} di {p['shop']['name']} ({p['shop']['district']}), Jarak: {p['shop']['distance_km']} km\n"
 
     # Get AI response

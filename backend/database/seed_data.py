@@ -250,35 +250,8 @@ async def seed_database(session: AsyncSession):
     print(f"[OK] Seeded {len(products_created)} products with price history across multiple sources!")
     print(f"[DATA] Total price entries: {len(products_created) * 3 * 12}")
 
-    # Seed Local Shops & Local Products (Fitur 1)
-    shop_result = await session.execute(select(LocalShop).limit(1))
-    if shop_result.scalars().first() is None:
-        print("[SEED] Seeding Local Shops and Local Products for AI Matchmaker...")
-        shops_data = [
-            {"name": "Toko Batik Pak Tono", "whatsapp": "081234567890", "address": "Jl. Rajiman, Laweyan", "district": "Laweyan", "lat": -7.5756, "lng": 110.8033},
-            {"name": "Serabi Notosuman Ibu Lidia", "whatsapp": "081298765432", "address": "Jl. Moh. Yamin, Serengan", "district": "Serengan", "lat": -7.5786, "lng": 110.8173},
-            {"name": "Kerajinan Blangkon Mas Joko", "whatsapp": "085612341234", "address": "Jl. Yos Sudarso, Pasar Kliwon", "district": "Pasar Kliwon", "lat": -7.5746, "lng": 110.8253},
-        ]
-        
-        created_shops = []
-        for s in shops_data:
-            shop = LocalShop(**s)
-            session.add(shop)
-            created_shops.append(shop)
-        
-        await session.flush()
-        
-        products_data = [
-            {"shop_id": created_shops[0].id, "name": "Batik Tulis Motif Parang", "category": "batik", "price": 450000, "stock": 5, "description": "Batik tulis asli buatan tangan"},
-            {"shop_id": created_shops[0].id, "name": "Kemeja Batik Cap", "category": "batik", "price": 120000, "stock": 20, "description": "Bahan katun adem"},
-            {"shop_id": created_shops[1].id, "name": "Serabi Notosuman Coklat", "category": "pangan", "price": 25000, "stock": 100, "description": "Serabi coklat legit, per kotak isi 10"},
-            {"shop_id": created_shops[1].id, "name": "Serabi Notosuman Polos", "category": "pangan", "price": 20000, "stock": 100, "description": "Serabi original, per kotak isi 10"},
-            {"shop_id": created_shops[2].id, "name": "Blangkon Solo Halus", "category": "kerajinan", "price": 75000, "stock": 15, "description": "Ukuran 55-60 tersedia"},
-        ]
-        
-        for p in products_data:
-            product = LocalProduct(**p)
-            session.add(product)
-            
-        await session.commit()
-        print("[OK] Seeded Local Shops and Products successfully!")
+    # Seed Local Shops & Local Products (Fitur 1) - DISABLED for Hackathon demo so user data is isolated
+    # shop_result = await session.execute(select(LocalShop).limit(1))
+    # if shop_result.scalars().first() is None:
+    #    pass
+    print("[OK] Skipped Seeding Local Shops and Products to preserve user data!")

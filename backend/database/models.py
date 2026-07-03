@@ -111,6 +111,7 @@ class LocalShop(Base):
     __tablename__ = "local_shops"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True) # Optional for seed data, required for real users
     name = Column(String(100), nullable=False)
     whatsapp = Column(String(20), nullable=False)
     address = Column(String(255), nullable=False)
