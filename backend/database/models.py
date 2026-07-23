@@ -17,11 +17,29 @@ class User(Base):
     full_name = Column(String(150), nullable=True, default="")
     email = Column(String(100), unique=True, nullable=False)
     password_hash = Column(String(200), nullable=False)
+    role = Column(String(20), nullable=False, default="merchant")  # merchant | buyer | admin
     profile_picture = Column(String(500), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"<User(id={self.id}, username='{self.username}')>"
+        return f"<User(id={self.id}, username='{self.username}', role='{self.role}')>"
+
+
+class ActivityLog(Base):
+    __tablename__ = "activity_logs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_role = Column(String(20), nullable=False)
+    activity_type = Column(String(100), nullable=False)
+    detail = Column(Text, nullable=True)
+    status = Column(String(20), nullable=False, default="success")  # success | failed
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User")
+
+    def __repr__(self):
+        return f"<ActivityLog(user_id={self.user_id}, type='{self.activity_type}')>"
 
 
 class CategoryEnum(str, enum.Enum):

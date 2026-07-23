@@ -8,7 +8,8 @@ import random
 from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from database.models import Product, PriceHistory, PriceAlert, LocalShop, LocalProduct
+from database.models import Product, PriceHistory, PriceAlert, LocalShop, LocalProduct, User, ActivityLog
+import bcrypt
 
 # ============================================================
 # PRODUCT DEFINITIONS
@@ -171,12 +172,45 @@ SOURCE_MAP = {
 async def seed_database(session: AsyncSession):
     """
     Seed the database with products, price history, and local shop mock data.
-    Only seeds if the database is empty.
+    Only seeds if the database is empty. Also ensures demo users exist.
     """
-    # Check if data already exists
+    # 1. Seed Demo Users (Constraint 1: RBAC) - ALWAYS RUN
+    demo_users_check = await session.execute(select(User).where(User.username == "pedagang1"))
+    if demo_users_check.scalars().first() is None:
+        print("[SEED] Creating demo users for BYTESFEST demo...")
+        salt = bcrypt.gensalt()
+        demo_password = bcrypt.hashpw("demo123".encode("utf-8"), salt).decode("utf-8")
+
+        demo_users = [
+            User(username="pedagang1", full_name="Bu Sri Warung Geprek", email="pedagang@demo.com", password_hash=demo_password, role="merchant"),
+            User(username="pembeli1", full_name="Mas Budi Pembeli", email="pembeli@demo.com", password_hash=demo_password, role="buyer"),
+            User(username="admin1", full_name="Admin Dinas Koperasi", email="admin@demo.com", password_hash=demo_password, role="admin"),
+        ]
+        for u in demo_users:
+            session.add(u)
+        await session.flush()
+
+        # Seed sample activity logs
+        now = datetime.utcnow()
+        sample_logs = [
+            ActivityLog(user_id=demo_users[0].id, user_role="merchant", activity_type="Cek Health Score", detail="Ayam Geprek Sambel Korek - Skor 67", status="success", created_at=now - timedelta(minutes=5)),
+            ActivityLog(user_id=demo_users[0].id, user_role="merchant", activity_type="Simulasi HPP Naik", detail="Simulasi kenaikan modal 10%", status="success", created_at=now - timedelta(minutes=12)),
+            ActivityLog(user_id=demo_users[0].id, user_role="merchant", activity_type="Generasi Copywriting", detail="Deskripsi produk Ayam Geprek", status="success", created_at=now - timedelta(minutes=30)),
+            ActivityLog(user_id=demo_users[1].id, user_role="buyer", activity_type="Pencarian Produk", detail="Pencarian: Batik Parang Laweyan", status="success", created_at=now - timedelta(minutes=8)),
+            ActivityLog(user_id=demo_users[1].id, user_role="buyer", activity_type="Chat AI", detail="Tanya rekomendasi batik Solo", status="success", created_at=now - timedelta(minutes=20)),
+            ActivityLog(user_id=demo_users[2].id, user_role="admin", activity_type="Monitoring Dashboard", detail="Buka halaman admin panel", status="success", created_at=now - timedelta(minutes=2)),
+            ActivityLog(user_id=demo_users[0].id, user_role="merchant", activity_type="Pricing Advisor", detail="Konsultasi harga ideal geprek", status="success", created_at=now - timedelta(hours=1)),
+            ActivityLog(user_id=demo_users[1].id, user_role="buyer", activity_type="Hubungi Penjual", detail="WhatsApp redirect ke Toko Batik Laweyan", status="success", created_at=now - timedelta(hours=2)),
+        ]
+        for log in sample_logs:
+            session.add(log)
+        await session.commit()
+        print(f"[OK] Seeded 3 demo users + {len(sample_logs)} activity logs!")
+
+    # 2. Check if product data already exists
     result = await session.execute(select(Product).limit(1))
     if result.scalars().first() is not None:
-        print("[DB] Database already seeded. Skipping...")
+        print("[DB] Database products already seeded. Skipping product seed...")
         return
 
     print("[SEED] Seeding database with Solo Raya market data...")

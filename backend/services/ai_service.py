@@ -101,6 +101,7 @@ async def generate_product_description(
     product_name: str,
     category: str = "",
     additional_info: str = "",
+    image: str = None
 ) -> str:
     """
     Generate an attractive product description for online selling.
@@ -109,6 +110,7 @@ async def generate_product_description(
         product_name: Name of the product
         category: Product category
         additional_info: Additional details about the product
+        image: Optional base64 encoded image string (e.g. "data:image/jpeg;base64,...")
     
     Returns:
         Generated product description
@@ -138,12 +140,23 @@ Buat deskripsi yang:
 
 Langsung tulis deskripsinya tanpa tambahan penjelasan."""
 
+    # Use vision model if image is provided
+    if image:
+        model = "llama-3.2-11b-vision-preview"
+        
+        user_content = [
+            {"type": "text", "text": prompt},
+            {"type": "image_url", "image_url": {"url": image}}
+        ]
+    else:
+        user_content = prompt
+
     try:
         response = await client.chat.completions.create(
             model=model,
             messages=[
                 {"role": "system", "content": "Kamu adalah copywriter profesional yang ahli membuat deskripsi produk UMKM Solo untuk marketplace online."},
-                {"role": "user", "content": prompt},
+                {"role": "user", "content": user_content},
             ],
             temperature=0.8,
             max_tokens=512,
@@ -254,3 +267,57 @@ def _get_fallback_description(product_name: str, category: str) -> str:
 📱 *Chat kami untuk info lebih lanjut dan harga spesial!*
 
 #SoloRaya #UMKM #ProdukLokal #{category.capitalize()}Solo"""
+
+
+async def generate_health_diagnosis_explanation(health_result: dict) -> str:
+    """Generate localized explanation for Smart Business Health Score."""
+    cfg = get_config()
+    api_key = cfg["GROQ_API_KEY"]
+    model = "llama-3.3-70b-versatile"
+    
+    if not api_key or api_key == "your_groq_api_key_here":
+        return "Sistem AI sedang offline. Mohon periksa API Key Anda."
+        
+    client = AsyncGroq(api_key=api_key)
+    
+    inputs = health_result.get("inputs", {})
+    breakdown = health_result.get("breakdown", {})
+    score = health_result.get("score", 0)
+    
+    prompt = f"""Kamu adalah konsultan bisnis UMKM berpengalaman dari Solo yang ramah. Berikan diagnosis mendalam namun mudah dipahami oleh pedagang kecil menggunakan gaya bahasa campuran Indonesia dan dialek lokal Solo/Jawa yang sopan (seperti menyapa dengan 'Nggih', 'Pripun', 'Monggo').
+
+DATA PEDAGANG:
+- Produk: {inputs.get('product_name')}
+- Lokasi: {inputs.get('location')}
+- Target Margin: {inputs.get('target_margin')}%
+- Harga Modal: Rp{inputs.get('capital_price')}
+- Harga Jual: Rp{inputs.get('selling_price')}
+- Harga Kompetitor: Rp{inputs.get('competitor_price')}
+- Stok: {inputs.get('stock')}
+
+HASIL ANALISIS SISTEM (Skor Total: {score}/100):
+- Margin Score: {breakdown.get('margin_score')}/100 (Margin aktual: {health_result.get('actual_margin')}%)
+- Harga Pasar Score: {breakdown.get('price_score')}/100
+- Tren Score: {breakdown.get('trend_score')}/100 (Tren: {inputs.get('trend')})
+- Promosi Score: {breakdown.get('promo_score')}/100
+- Stok Score: {breakdown.get('stock_score')}/100
+
+TUGAS:
+Berikan penjelasan sekitar 3-4 paragraf.
+1. Sapa pedagang dan sampaikan gambaran besar skor kesehatan bisnisnya saat ini.
+2. Jelaskan metrik mana yang paling kritis (misal margin menyusut karena harga modal naik, atau harga jual terlalu murah dibanding kompetitor).
+3. Berikan saran praktis (actionable) apa yang harus mereka lakukan hari ini.
+
+Catatan: Jangan jelaskan detail angka satu per satu secara kaku, tapi rangkum intisari masalahnya (contoh: "Modal panjenengan naik, jadinya untungnya mepet banget cuma x% padahal targetnya y%")."""
+
+    try:
+        response = await client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=600
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        print(f"[ERROR] Groq API error: {e}")
+        return "Maaf, AI sedang sibuk. Mohon coba beberapa saat lagi."

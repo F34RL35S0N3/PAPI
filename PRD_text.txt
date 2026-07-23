@@ -1,94 +1,130 @@
-PRODUCT REQUIREMENTS DOCUMENT (PRD) & IMPLEMENTATION PLAN  
-Nama Proyek:  PasarPintar AI Kompetisi:  Hackathon BYTESFEST 2026 (Universitas Sebelas 
-Maret) Tema SDGs:  SDG 8 - Decent Work and Economic Growth  (Pekerjaan Layak dan 
-Pertumbuhan Ekonomi)  
-A. Ringkasan Eksekutif & Objektif  
-Masalah:  Pedagang UMKM di Solo Raya kesulitan memantau harga bahan baku, tren 
-konsumen, dan bersaing dengan toko online besar karena keterbatasan akses data. 
-Solusi: PasarPintar AI adalah asisten kecerdasan buatan dan dashboard  analitik yang 
-meratakan lapangan bermain bagi pedagang lokal, memberikan wawasan harga pasar real-
-time dan rekomendasi bisnis. Tujuan Hackathon:  Membangun Minimum Viable Product  
-(MVP) yang solid, anti -bug, dan memiliki flow demo yang mulus sebelum jam 12.00 di hari 
-H, sehingga siap mengintegrasikan 2 constraint  kejutan dari panitia.  
-B. Spesifikasi Fitur (Scope of Work)  
-Fitur dibagi berdasarkan prioritas eksekusi untuk manajemen waktu saat Hackathon Day : 
-1. Fitur MVP (WAJIB - Selesai sebelum 12.30)  
-• AI Chat Assistant:  Asisten AI berbasis NLP/LLM tempat pedagang bisa bertanya 
-(misal: "Berapa harga wajar kain batik cap minggu ini?"). AI akan merangkum tren 
-dan menjawab menggunakan data lokal.  
-• Dashboard Harga Pasar:  Visualisasi grafik harga mingguan per kategori produk 
-(batik, kerajinan, pangan) yang bisa difilter.  
-• Rekomendasi Waktu Jual:  Sistem analitik berdasarkan pola harga historis yang 
-merekomendasikan kapan waktu terbaik bagi pedagang untuk menjual stoknya 
-(misal: harga sedang naik).  
-2. Fitur "Bagus Punya" (Dikerjakan jika waktu sisa/setelah constraint ) 
-• Generator Deskripsi Produk:  Fitur otomatisasi copywriting  untuk jualan online 
-hanya dengan input nama dan foto produk.  
-• Alert Harga Anomali:  Notifikasi jika ada kenaikan atau penurunan harga pasar yang 
-signifikan.  
-3. Fitur Bonus  
-• Bandingkan Kompetitor:  Menampilkan perbandingan harga produk pedagang 
-versus penjual lain di platform e-commerce . 
----PAGE BREAK---
-C. Arsitektur Sistem & Tech Stack  
-Sistem menggunakan arsitektur modular agar siap menerima constraint  teknis tanpa 
-merombak kode utama.  
-• Frontend:  Next.js 14 (App Router) + Tailwind CSS. Bertugas mengurus UI 
-Dashboard, Chat Assistant, dan visualisasi grafik harga.  
-• Backend / API Layer:  FastAPI (Python). Berfungsi sebagai REST endpoints, 
-orkestrasi AI, scraping, dan analitik.  
-• AI Layer:  Groq / Claude API (Llama -3.1-70b / Mixtral). Dipilih karena latensinya yang 
-sangat rendah, penting untuk kecepatan respons saat demo di depan juri.  
-• Data Layer:  Supabase (PostgreSQL). Menyimpan riwayat chat, data produk, dan 
-harga historis.  
-• Scraper (Semi -Static Strategy):  BeautifulSoup / Playwright. Data scraping dari 
-Tokopedia/Shopee dan referensi pasar lokal dilakukan sebelum hari H lomba  untuk 
-menghindari pemblokiran anti-bot, lalu disimpan di Supabase untuk di -query via 
-API.  
-• Analitik:  Pandas + Recharts untuk menghitung moving average  dan tren harga 
-mingguan.  
-• Deployment:  Vercel (untuk Frontend Next.js) dan Railway (untuk Backend FastAPI) 
-agar setup cepat dan gratis.  
-D. Rencana Implementasi & Strategi (Hackathon Day - 23 Juli 2026)  
-Pelaksanaan dipusatkan di Gedung G FKIP UNS. Kunci keberhasilan adalah pembagian 
-peran (Satu orang fokus Frontend, satu orang fokus Backend/AI).  
-• 09.30 - 10.00: Menerima Constraint 1 (Teknis -Fungsional)  dari panitia. Evaluasi 
-dampaknya terhadap arsitektur modular yang sudah disiapkan.  
-• 10.00 - 12.30 (Fokus MVP):  Abaikan fitur bonus. Selesaikan 3 fitur wajib (Chat, 
-Dashboard, Rekomendasi). Pastikan ini berjalan 100% sempurna.  
-• 13.00 - 13.30: Menerima Constraint 2 (Kontekstual) . Lakukan diskusi cepat selama 
-10 menit untuk mencari celah integrasi termudah.  
-• 13.30 - 16.00 (Polish & Integrasi):  Integrasikan Constraint 2. Sisa waktu digunakan 
-hanya untuk merapikan UI dan memastikan alur demo mulus. Jangan menambah 
-fitur baru.  
----PAGE BREAK---
-• 16.00 - Selesai: Menghentikan pengembangan, melakukan push kode terakhir ke 
-GitHub repositori, dan submit output akhir ke panitia. Selesai ini, fokus beralih ke 
-persiapan slide presentasi.  
-E. Strategi Pitching & Demo (Pitching Day - 24 Juli 2026)  
-Dilaksanakan pada 24 Juli dengan struktur 5 menit yang berpusat pada storytelling : 
-1. 0:00 - 0:45 (Hook):  Buka dengan cerita "Pak Budi", penjual batik Pasar Klewer 
-selama 20 tahun yang kebingungan memantau harga wajar di era digital.  
-2. 0:45 - 1:30 (Solusi):  Perkenalkan PasarPintar AI sebagai asisten kecerdasan buatan 
-khusus UMKM Solo Raya.  
-3. 1:30 - 3:00 (Demo Live):  Lakukan 1 alur demo yang berkesinambungan (Tanya harga 
-di chat -> lihat tren di dashboard  -> buat deskripsi produk untuk dijual). Fokus pada 
-transisi yang mulus.  
-4. 3:00 - 4:00 (Dampak & SDG):  Tekankan bahwa ada 160.000 UMKM di Solo Raya 
-yang terbantu. Hubungkan langsung dengan SDG 8 (memastikan digitalisasi tidak 
-meninggalkan pedagang kecil).  
-5. 4:00 - 5:00 (Closing & QnA):  Tutup dengan pernyataan kuat: "Ini adalah teman 
-bisnis digital pertama yang bicara bahasa pedagang lokal." Bersiap menjawab 
-pertanyaan juri soal akurasi data dan skalabilitas.  
-F. Metrik Sukses & Penilaian Juri  
-Berdasarkan panduan BYTESFEST, poin yang harus dimaksimalkan:  
-• Integrasi Constraint:  Seberapa dalam dan adaptif tim memasukkan 2 constraint 
-kejutan ke dalam solusi.  
-• Kualitas & Fungsionalitas (Proyeksi Skor 80%):  Produk berjalan mulus tanpa bug 
-saat demonstrasi.  
-• Pitching (Proyeksi Skor 95%):  Kejelasan penyampaian, storytelling , dan 
-kemampuan menjawab pertanyaan juri dengan percaya diri.  
-• Relevansi & Dampak (Proyeksi Skor 92%):  Kekuatan korelasi solusi dengan SDG 8 
-dan efektivitas menyelesaikan masalah UMKM Solo  
- 
----PAGE BREAK---
+1. LATAR BELAKANG & PENYESUAIAN KONTEKS LOKAL
+Berdasarkan data Kajian Digitalisasi IKM dan UMKM Kota Surakarta oleh BRIDA Surakarta (2023), terdapat 11.157 unit UMKM di mana 72,29% bergerak di sektor perdagangan, dengan konsentrasi terbesar berada di Kecamatan Pasar Kliwon (2.982 unit atau 26,73%)
+. Meskipun adopsi transaksi digital sudah berjalan, pemanfaatan teknologi untuk analisis keputusan bisnis (decision intelligence) masih sangat rendah (hanya 7,25% UMKM yang menggunakan aplikasi pencatatan keuangan digital)
+. Di sisi lain, volatilitas harga komoditas pokok di Solo Raya sangat tinggi; data PIHPS Bank Indonesia 2026 menunjukkan harga cabai rawit merah bergerak dari Rp64.000 hingga Rp115.000 per kilogram dengan lonjakan harian mencapai 18-21%
+.
+PasarPintar AI hadir untuk mengintegrasikan data internal UMKM dengan kondisi pasar eksternal
+. Guna memenuhi Constraint 1 dan Constraint 2 dari panitia BYTESFEST 2026, sistem diperluas dengan menambahkan manajemen pengguna berbasis peran (Role-Based Access Control), pencatatan log aktivitas riil, serta Dashboard Dampak Interaktif untuk memberikan wawasan bisnis yang lebih presisi dan dapat dipertanggungjawabkan saat demonstrasi di hadapan dewan juri
+.
+2. SPESIFIKASI CONSTRAINT 1: MULTI-ROLE COLLABORATION & ACTIVITY MONITORING
+Sistem wajib mengimplementasikan kontrol akses berbasis peran (Role-Based Access Control / RBAC) yang membagi pengguna menjadi tiga peran (roles) berbeda dengan hak akses yang terenkripsi dan dapat dibuktikan secara langsung saat demo
+.
+2.1. Definisi Peran (Roles) & Hak Akses
+1. Peran: Pedagang / Pelaku UMKM (Merchant)
+Hak Akses: Memasukkan parameter modal dan produk internal, memicu kalkulasi margin, menjalankan simulasi skenario, serta menyusun rencana aksi taktis harian
+.
+Spesifikasi Dashboard:
+Widget Smart Business Health Score (0–100) ter-update
+.
+Panel AI Pricing Advisor yang terhubung ke kalkulator margin
+.
+Antarmuka What-if Business Simulator interaktif menggunakan sliders
+.
+Akses ke generator takarir iklan berbasis tren lokal
+.
+2. Peran: Pembeli / Konsumen Lokal (Buyer)
+Hak Akses: Mencari produk khas Solo Raya, berinteraksi dengan asisten pencarian semantik (AI Matchmaker), dan melakukan redirect transaksi langsung ke kontak WhatsApp pedagang
+.
+Spesifikasi Dashboard:
+Bilah pencarian produk berbasis bahasa alami (contoh: "Batik parang daerah Laweyan").
+Grid visual katalog produk khas Solo Raya (batik, kuliner khas, kriya)
+.
+Tombol aksi delegasi pesan otomatis WhatsApp
+.
+Dashboard tidak menampilkan data keuangan internal toko, HPP, atau kalkulator simulator pedagang.
+3. Peran: Administrator (Dinas Koperasi & UKM / System Admin)
+Hak Akses: Memantau kesehatan ekosistem UMKM secara agregat, mengelola lisensi pengguna, serta memantau performa aktivitas seluruh pengguna secara real-time
+.
+Spesifikasi Dashboard (Activity Monitoring Page):
+Widget kuantitatif: Jumlah Pengguna Aktif (hari ini), Total Aktivitas Sistem (hari ini)
+.
+Chart visualisasi: Distribusi Aktivitas Berdasarkan Peran (menggunakan Pie Chart dari Recharts)
+.
+Recent Activity Log List: Menampilkan daftar aktivitas pengguna terbaru secara kronologis (statis dilarang)
+.
+2.2. Spesifikasi Log Aktivitas Pengguna (User Activity Logging)
+Setiap kali pengguna melakukan interaksi penting, sistem secara otomatis mencatat riwayat tindakan tersebut ke dalam basis data PostgreSQL Supabase
+. Parameter yang dicatat meliputi:
+User_ID & Role (Pedagang, Pembeli, Admin).
+Activity_Type (e.g., "Simulasi HPP Naik", "Generasi Copywriting", "Pencarian Batik Laweyan").
+Timestamp (Waktu eksekusi riil dari server).
+Status (Sukses/Gagal).
+3. SPESIFIKASI CONSTRAINT 2: SMART IMPACT DASHBOARD & ACTION LOG
+Fitur ini menyediakan visualisasi tingkat tinggi mengenai kondisi utama pasar Solo Raya, dampak finansial terhadap UMKM harian, serta daftar tindakan taktis yang harus segera dieksekusi
+.
+3.1. Empat Metrik Utama Dashboard (4 Key Metrics)
+Dashboard dampak wajib memuat minimal empat indikator kinerja kuantitatif yang dinamis
+:
+Rata-rata Skor Kesehatan Usaha (Average Smart Business Health Score): Agregasi skor dari pembobotan parameter margin (30%), harga pasar (25%), tren (20%), promosi (15%), dan stok (10%)
+.
+Proyeksi Peningkatan Profit (Estimated Profit Optimization %): Persentase estimasi keuntungan yang diperoleh jika UMKM menyesuaikan harga jual ke batas ideal sesuai rekomendasi Pricing Engine
+.
+Indeks Volatilitas Bahan Baku (Raw Material Volatility Index %): Mengukur tingkat kenaikan harga bahan pokok pangan regional (seperti cabai dan beras) yang diambil dari PIHPS dan Panel Harga Badan Pangan Nasional
+.
+Tindakan Bisnis Terealisasi (Active Business Actions Executed): Jumlah rekomendasi harian dari asisten bisnis yang telah berhasil diimplementasikan atau disetujui oleh pedagang
+.
+3.2. Dua Filter Data Interaktif (2 Data Filters)
+Tampilan grafik, skor, dan metrik pada dashboard akan bergeser secara dinamis berdasarkan filter aktif
+:
+Filter Wilayah/Kecamatan di Solo Raya: Pengguna dapat memfilter data berdasarkan wilayah spesifik (Pasar Kliwon, Laweyan, Jebres, Banjarsari, Serengan)
+.
+Filter Kategori Sektor Usaha: Membatasi wawasan pasar hanya pada sektor tertentu (Batik & Fesyen, Kuliner, Kriya, Pangan/Sembako)
+.
+3.3. Tabel Detail Aksi Strategis (Action Log Table)
+Tabel ini menampilkan daftar bahan baku atau produk yang membutuhkan intervensi harga atau stok berdasarkan perubahan kondisi pasar lokal secara mendadak
+.
+Nama Item
+Kategori
+Kondisi / Status
+Tingkat Prioritas
+Waktu Pemutakhiran
+Tombol Aksi (Action Button)
+Cabai Rawit Merah
+Kuliner / Bahan Baku
+Harga Melonjak 12%
+Tinggi (High)
+5 Menit yang lalu
+Sesuaikan Harga Jual (Membuka Pricing Advisor)
+Batik Cap Parang
+Batik & Fesyen
+Tren Regional Naik
+Sedang (Medium)
+1 Jam yang lalu
+Buat Copywriting (Membuka Content Generator)
+Beras Medium
+Pangan / Sembako
+Harga Stabil
+Rendah (Low)
+Hari ini, 08:00
+Simulasikan Diskon (Membuka What-if Simulator)
+Kelebihan Integrasi: Ketika tombol aksi pada tabel ditekan, sistem Next.js akan langsung mengarahkan pengguna ke halaman fitur terkait dengan membawa parameter item tersebut, menciptakan alur demonstrasi (demo flow) yang sangat kohesif dan memukau dewan juri
+.
+4. DIAGRAM ALUR INTEGRASI DATA & PENGAMBILAN KEPUTUSAN
++---------------------------------------------------------------------------------+
+|                                 FRONTEND (Next.js 14)                           |
+|                                                                                 |
+|   [Role: Pedagang]             [Role: Pembeli]               [Role: Admin]      |
+|   - Health Score Dashboard     - AI Matchmaker Search        - User Logs Map    |
+|   - What-if Simulator Sliders  - WA Direct Button            - Activity Charts  |
++---------------------------------------------------------------------------------+
+          |                               |                            |
+          +-------------------------------+----------------------------+
+                                          |
+                                          v (REST API Request with Token/Role ID)
++---------------------------------------------------------------------------------+
+|                             BACKEND (FastAPI Layer)                             |
+|                                                                                 |
+|   [RBAC Middleware] ---> Memverifikasi hak akses peran secara ketat             |
+|   [Logging Engine]  ---> Mencatat log tindakan pengguna secara otomatis         |
+|   [Analytic Engine] ---> Mengolah metrik dampak & parameter tabel aksi          |
++---------------------------------------------------------------------------------+
+                                          |
+                     +--------------------+--------------------+
+                     | (Read/Write)                            | (Query Real-Time)
+                     v                                         v
++------------------------------------------+       +------------------------------+
+|             DATABASE LAYER               |       |         AI ENGINE            |
+| - Supabase (Data UMKM, HPP, Stok) [12, 26]|       | - Groq / Claude API          |
+| - Activity Logs Table (Enforced RBAC)[10]|       | - Llama-3.1-70b (Explanation |
+| - PIHPS Solo Raya (Bahan Pangan) [7, 28]|       |   & Copywriting Layer) [43,48|
++------------------------------------------+       +------------------------------+

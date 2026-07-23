@@ -9,6 +9,7 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("merchant");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -29,6 +30,7 @@ export default function RegisterPage() {
           full_name: fullName,
           email,
           password,
+          role,
         }),
       });
 
@@ -93,6 +95,32 @@ export default function RegisterPage() {
           <div className="glass-card p-6 sm:p-8">
             <form className="space-y-5" onSubmit={handleRegister}>
               {error && <Notice>{error}</Notice>}
+
+              <div>
+                <span className="mb-3 block text-sm font-bold text-slate-600">Pilih Peran Anda</span>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { value: "merchant", label: "Pedagang", emoji: "🏪", desc: "Pelaku UMKM" },
+                    { value: "buyer", label: "Pembeli", emoji: "🛒", desc: "Konsumen Lokal" },
+                    { value: "admin", label: "Admin", emoji: "🛡️", desc: "Dinas/Sistem" },
+                  ].map((r) => (
+                    <button
+                      key={r.value}
+                      type="button"
+                      onClick={() => setRole(r.value)}
+                      className={`flex flex-col items-center gap-1 rounded-2xl border-2 p-3 text-center transition-all ${
+                        role === r.value
+                          ? "border-slate-900 bg-slate-900 text-white shadow-lg scale-[1.03]"
+                          : "border-slate-200 bg-white/60 text-slate-600 hover:border-slate-400"
+                      }`}
+                    >
+                      <span className="text-2xl">{r.emoji}</span>
+                      <span className="text-xs font-black">{r.label}</span>
+                      <span className={`text-[10px] ${role === r.value ? "text-slate-300" : "text-slate-400"}`}>{r.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               <div className="grid gap-5 sm:grid-cols-2">
                 <Field label="Nama Lengkap">

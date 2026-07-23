@@ -16,6 +16,7 @@ class DescriptionRequest(BaseModel):
     product_name: str
     category: str = ""
     additional_info: str = ""
+    image: Optional[str] = None
 
 
 class DescriptionResponse(BaseModel):
@@ -36,6 +37,7 @@ async def generate_description(request: DescriptionRequest, db: AsyncSession = D
         product_name=request.product_name,
         category=request.category,
         additional_info=request.additional_info,
+        image=request.image
     )
 
     return DescriptionResponse(

@@ -112,6 +112,8 @@ export interface LocalProduct {
   name: string;
   category: string;
   price: number;
+  stock: number;
+  description?: string;
   shop: LocalShop;
 }
 
@@ -127,4 +129,80 @@ export interface OptimizeResponse {
   total_distance_km: number;
   estimated_savings: number;
   points: RoutePoint[];
+}
+
+// Business Features
+export interface HealthScore {
+  score: number;
+  status: string;
+  actual_margin: number;
+  breakdown: {
+    margin_score: number;
+    price_score: number;
+    trend_score: number;
+    promo_score: number;
+    stock_score: number;
+  };
+  ai_explanation?: string;
+}
+
+export interface PricingAdvice {
+  ideal_price: number;
+  maximum_safe_price: number;
+  estimated_profit: number;
+  explanation: string;
+}
+
+export interface SimulationResult {
+  old_profit: number;
+  new_profit: number;
+  profit_change_pct: number;
+  old_margin: number;
+  new_margin: number;
+  recommendation: string;
+  new_ideal_price: number;
+}
+
+export interface CopilotAction {
+  priority: "High" | "Medium" | "Low";
+  title: string;
+  description: string;
+}
+
+// Constraint 1: Activity Monitoring
+export interface ActivityLogEntry {
+  id: number;
+  user_id: number;
+  user_role: string;
+  activity_type: string;
+  detail: string | null;
+  status: string;
+  created_at: string;
+  username: string | null;
+}
+
+export interface ActivityStats {
+  active_users_today: number;
+  total_activities_today: number;
+  total_users: number;
+  role_distribution: { role: string; count: number }[];
+}
+
+// Constraint 2: Impact Dashboard
+export interface ImpactMetrics {
+  avg_health_score: number;
+  profit_optimization_pct: number;
+  raw_material_volatility_pct: number;
+  actions_executed: number;
+  filters_applied: { district: string | null; category: string | null };
+}
+
+export interface ActionItem {
+  name: string;
+  category: string;
+  condition: string;
+  priority: "high" | "medium" | "low";
+  change_pct: number;
+  last_updated: string | null;
+  action_type: string;
 }

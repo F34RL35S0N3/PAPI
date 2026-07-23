@@ -30,6 +30,12 @@ from routers.alerts import router as alerts_router
 from routers.auth import router as auth_router
 from routers.routes import router as routes_router
 from routers.marketplace import router as marketplace_router
+from routers.health_score import router as health_score_router
+from routers.pricing_advisor import router as pricing_advisor_router
+from routers.simulator import router as simulator_router
+from routers.copilot import router as copilot_router
+from routers.activity_log import router as activity_log_router
+from routers.impact_dashboard import router as impact_dashboard_router
 from fastapi.staticfiles import StaticFiles
 
 # Create static directory if it doesn't exist
@@ -54,7 +60,7 @@ async def lifespan(app: FastAPI):
 
     print("[OK] PasarPintar AI Backend is ready!")
     print("[DOCS] API docs available at: http://localhost:8000/docs")
-
+    
     yield
 
     # === SHUTDOWN ===
@@ -99,6 +105,12 @@ app.include_router(alerts_router)
 app.include_router(auth_router)
 app.include_router(routes_router)
 app.include_router(marketplace_router)
+app.include_router(health_score_router)
+app.include_router(pricing_advisor_router)
+app.include_router(simulator_router)
+app.include_router(copilot_router)
+app.include_router(activity_log_router)
+app.include_router(impact_dashboard_router)
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")

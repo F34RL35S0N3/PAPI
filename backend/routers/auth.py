@@ -28,12 +28,14 @@ class UserCreate(BaseModel):
     full_name: str = ""
     email: str
     password: str
+    role: str = "merchant"  # merchant | buyer | admin
 
 class UserResponse(BaseModel):
     id: int
     username: str
     full_name: str | None = ""
     email: str
+    role: str = "merchant"
     profile_picture: str | None = None
     
     class Config:
@@ -72,12 +74,15 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     if db_user:
         raise HTTPException(status_code=400, detail="Username or email already registered")
     
+    if user_data.role not in ("merchant", "buyer", "admin"):
+        raise HTTPException(status_code=400, detail="Role harus merchant, buyer, atau admin")
     hashed_password = get_password_hash(user_data.password)
     new_user = User(
         username=user_data.username,
         full_name=user_data.full_name,
         email=user_data.email,
-        password_hash=hashed_password
+        password_hash=hashed_password,
+        role=user_data.role
     )
     db.add(new_user)
     await db.commit()
@@ -101,7 +106,7 @@ async def login(
     
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data={"sub": user.username, "role": user.role}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 

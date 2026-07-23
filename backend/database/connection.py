@@ -30,7 +30,15 @@ async def get_db():
 
 
 async def init_db():
-    """Create all tables in the database."""
+    """Create all tables in the database and handle schema updates."""
     async with engine.begin() as conn:
-        from database.models import Product, PriceHistory, ChatHistory, PriceAlert, User, LocalShop, LocalProduct
+        from database.models import Product, PriceHistory, ChatHistory, PriceAlert, User, LocalShop, LocalProduct, ActivityLog
         await conn.run_sync(Base.metadata.create_all)
+
+        # Migration: Add 'role' column to users if it doesn't exist
+        try:
+            from sqlalchemy import text
+            await conn.execute(text("ALTER TABLE users ADD COLUMN role VARCHAR(20) DEFAULT 'merchant'"))
+            print("[DB] Added 'role' column to users table.")
+        except Exception:
+            pass  # Column already exists or table freshly created

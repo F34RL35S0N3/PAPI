@@ -16,11 +16,15 @@ import type {
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...options?.headers,
+  };
+
   const res = await fetch(`${API_BASE}${endpoint}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
+    headers,
     ...options,
   });
 
@@ -100,7 +104,8 @@ export async function getRecommendations(
 export async function generateDescription(
   productName: string,
   category: string = "",
-  additionalInfo: string = ""
+  additionalInfo: string = "",
+  image: string | null = null
 ): Promise<DescriptionResponse> {
   return fetchAPI<DescriptionResponse>("/api/descriptions/generate", {
     method: "POST",
@@ -108,6 +113,7 @@ export async function generateDescription(
       product_name: productName,
       category,
       additional_info: additionalInfo,
+      image,
     }),
   });
 }
@@ -137,4 +143,154 @@ export async function optimizeRoute(destinations: string[]): Promise<OptimizeRes
     method: "POST",
     body: JSON.stringify({ destinations }),
   });
+}
+
+// ---- Marketplace ----
+import type { LocalShop, LocalProduct } from "./types";
+
+export async function getMyShop(): Promise<LocalShop | null> {
+  return fetchAPI<LocalShop | null>("/api/marketplace/shop");
+}
+
+export async function updateMyShop(data: {
+  name: string;
+  whatsapp: string;
+  address: string;
+  district: string;
+}): Promise<LocalShop> {
+  return fetchAPI<LocalShop>("/api/marketplace/shop", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function getMyProducts(): Promise<LocalProduct[]> {
+  return fetchAPI<LocalProduct[]>("/api/marketplace/products");
+}
+
+export async function addMyProduct(data: {
+  name: string;
+  category: string;
+  price: number;
+  stock: number;
+  description?: string;
+}): Promise<LocalProduct> {
+  return fetchAPI<LocalProduct>("/api/marketplace/products", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateMyProduct(
+  id: number,
+  data: {
+    name: string;
+    category: string;
+    price: number;
+    stock: number;
+    description?: string;
+  }
+): Promise<LocalProduct> {
+  return fetchAPI<LocalProduct>(`/api/marketplace/products/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteMyProduct(id: number): Promise<void> {
+  await fetchAPI(`/api/marketplace/products/${id}`, { method: "DELETE" });
+}
+
+// ---- Business Features ----
+import type { HealthScore, PricingAdvice, SimulationResult, CopilotAction } from "./types";
+
+export async function getHealthScore(data: {
+  product_name: string;
+  category: string;
+  location: string;
+  capital_price: number;
+  selling_price: number;
+  stock: number;
+  target_margin: number;
+  competitor_price: number;
+  trend: string;
+  promotion_text: string;
+}): Promise<HealthScore> {
+  return fetchAPI<HealthScore>("/api/business/health-score", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function getPricingAdvice(data: {
+  capital_price: number;
+  target_margin: number;
+  competitor_price: number;
+  trend: string;
+}): Promise<PricingAdvice> {
+  return fetchAPI<PricingAdvice>("/api/business/pricing-advisor", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function runSimulation(data: {
+  scenario: string;
+  percentage: number;
+  capital_price: number;
+  selling_price: number;
+  sales_volume: number;
+}): Promise<SimulationResult> {
+  return fetchAPI<SimulationResult>("/api/business/simulator", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function getCopilotPlan(products: {
+  name: string;
+  capital_price: number;
+  selling_price: number;
+  target_margin: number;
+  trend: string;
+}[]): Promise<CopilotAction[]> {
+  return fetchAPI<CopilotAction[]>("/api/business/copilot", {
+    method: "POST",
+    body: JSON.stringify({ products }),
+  });
+}
+
+// ---- Constraint 1: Activity Logging ----
+import type { ActivityLogEntry, ActivityStats, ImpactMetrics, ActionItem } from "./types";
+
+export async function logActivity(data: { activity_type: string; detail?: string; status?: string }): Promise<void> {
+  await fetchAPI("/api/activity/log", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function getActivityLogs(limit: number = 30): Promise<ActivityLogEntry[]> {
+  return fetchAPI<ActivityLogEntry[]>(`/api/activity/logs?limit=${limit}`);
+}
+
+export async function getActivityStats(): Promise<ActivityStats> {
+  return fetchAPI<ActivityStats>("/api/activity/stats");
+}
+
+// ---- Constraint 2: Impact Dashboard ----
+export async function getImpactMetrics(district?: string, category?: string): Promise<ImpactMetrics> {
+  const params = new URLSearchParams();
+  if (district) params.set("district", district);
+  if (category) params.set("category", category);
+  const query = params.toString();
+  return fetchAPI<ImpactMetrics>(`/api/impact/metrics${query ? `?${query}` : ""}`);
+}
+
+export async function getActionItems(district?: string, category?: string): Promise<ActionItem[]> {
+  const params = new URLSearchParams();
+  if (district) params.set("district", district);
+  if (category) params.set("category", category);
+  const query = params.toString();
+  return fetchAPI<ActionItem[]>(`/api/impact/action-items${query ? `?${query}` : ""}`);
 }
