@@ -16,7 +16,7 @@ async def scrape_market_news() -> str:
     queries = ["harga sembako beras solo hari ini", "harga batik solo pasar klewer"]
     query = random.choice(queries)
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(verify=False) as client:
             resp = await client.get(
                 f"https://html.duckduckgo.com/html/?q={query}",
                 headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"},

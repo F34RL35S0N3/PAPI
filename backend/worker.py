@@ -28,5 +28,5 @@ async def background_market_worker():
         except Exception as e:
             print(f"[WORKER] Error in background task: {e}")
             
-        # Wait 30 seconds before next fetch to avoid rate limits
-        await asyncio.sleep(30)
+        # Wait 10 minutes before next fetch to avoid Gemini rate limits
+        await asyncio.sleep(600)

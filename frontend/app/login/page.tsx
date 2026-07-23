@@ -55,15 +55,15 @@ export default function LoginPage() {
             >
               PP
             </Link>
-            <h1 className="mt-5 text-3xl font-black text-slate-950">
+            <h1 className="mt-5 text-3xl font-black text-white">
               Login ke PasarPintar AI
             </h1>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+            <p className="mt-2 text-sm leading-6 text-slate-300">
               Masuk untuk memantau harga pasar dan rekomendasi toko Anda.
             </p>
           </div>
 
-          <div className="glass-card p-6 sm:p-8">
+          <div className="p-6 sm:p-8 bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl rounded-3xl">
             <form className="space-y-5" onSubmit={handleLogin}>
               {error && <Notice tone="error">{error}</Notice>}
 
@@ -98,11 +98,11 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <p className="mt-6 text-center text-sm text-slate-600">
+            <p className="mt-6 text-center text-sm text-slate-200">
               Belum punya akun?{" "}
               <Link
                 href="/register"
-                className="font-black text-slate-950 underline decoration-slate-300 underline-offset-4 hover:decoration-slate-950"
+                className="font-black text-white underline decoration-white/40 underline-offset-4 hover:decoration-white"
               >
                 Daftar sekarang
               </Link>
@@ -117,10 +117,11 @@ export default function LoginPage() {
 function AuthBackground() {
   return (
     <div className="pointer-events-none fixed inset-0 overflow-hidden">
-      <div className="absolute inset-0 bg-[#f7f8fc]" />
-      <div className="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-sky-200/70 blur-3xl" />
-      <div className="absolute right-[-10%] top-12 h-[28rem] w-[28rem] rounded-full bg-orange-200/60 blur-3xl" />
-      <div className="absolute bottom-[-12rem] left-1/3 h-[30rem] w-[30rem] rounded-full bg-violet-200/60 blur-3xl" />
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url("/keraton.jpg")' }}
+      />
+      <div className="absolute inset-0 bg-slate-900/30" />
     </div>
   );
 }
@@ -134,7 +135,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-bold text-slate-600">{label}</span>
+      <span className="mb-2 block text-sm font-bold text-slate-200">{label}</span>
       {children}
     </label>
   );

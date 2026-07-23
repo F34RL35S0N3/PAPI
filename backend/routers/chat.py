@@ -20,6 +20,7 @@ router = APIRouter(prefix="/api/chat", tags=["Chat"])
 class ChatRequest(BaseModel):
     message: str
     session_id: str = "default"
+    vision_context: Optional[str] = None
 
 class LocalShopResponse(BaseModel):
     id: int
@@ -54,11 +55,18 @@ async def send_message(request: ChatRequest, db: AsyncSession = Depends(get_db))
     Send a message to the AI Chat Assistant.
     The AI uses current market price data as context for responses.
     """
-    if not request.message.strip():
-        raise HTTPException(status_code=400, detail="Pesan tidak boleh kosong")
+    if not request.message.strip() and not request.vision_context:
+        raise HTTPException(status_code=400, detail="Pesan atau gambar tidak boleh kosong")
 
     # Get price context for AI
     price_context = await get_price_context_for_ai(db)
+
+    # Process YOLO image scanning if context is provided
+    if request.vision_context:
+        # Inject YOLO result to context
+        price_context += f"\n\n[SISTEM YOLO VISUAL]: {request.vision_context}\nBerdasarkan hasil deteksi ini, berikan penjelasan kepada pengguna."
+
+
 
     # Get recent chat history for context
     history_result = await db.execute(

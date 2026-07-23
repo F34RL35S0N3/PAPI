@@ -19,6 +19,8 @@ class User(Base):
     password_hash = Column(String(200), nullable=False)
     role = Column(String(20), nullable=False, default="merchant")  # merchant | buyer | admin
     profile_picture = Column(String(500), nullable=True)
+    address = Column(Text, nullable=True)
+    district = Column(String(100), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     def __repr__(self):
@@ -154,6 +156,7 @@ class LocalProduct(Base):
     price = Column(Float, nullable=False)
     stock = Column(Integer, default=10)
     description = Column(Text, nullable=True)
+    image_url = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships

@@ -11,6 +11,8 @@ import type {
   PriceAlert,
   Category,
   DescriptionResponse,
+  AdminUser,
+  CatalogProduct,
 } from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -38,11 +40,12 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
 // ---- Chat ----
 export async function sendChatMessage(
   message: string,
-  sessionId: string = "default"
+  sessionId: string = "default",
+  visionContext?: string
 ): Promise<ChatResponse> {
   return fetchAPI<ChatResponse>("/api/chat/send", {
     method: "POST",
-    body: JSON.stringify({ message, session_id: sessionId }),
+    body: JSON.stringify({ message, session_id: sessionId, vision_context: visionContext }),
   });
 }
 
@@ -174,6 +177,7 @@ export async function addMyProduct(data: {
   price: number;
   stock: number;
   description?: string;
+  image_url?: string;
 }): Promise<LocalProduct> {
   return fetchAPI<LocalProduct>("/api/marketplace/products", {
     method: "POST",
@@ -189,6 +193,7 @@ export async function updateMyProduct(
     price: number;
     stock: number;
     description?: string;
+    image_url?: string;
   }
 ): Promise<LocalProduct> {
   return fetchAPI<LocalProduct>(`/api/marketplace/products/${id}`, {
@@ -198,7 +203,13 @@ export async function updateMyProduct(
 }
 
 export async function deleteMyProduct(id: number): Promise<void> {
-  await fetchAPI(`/api/marketplace/products/${id}`, { method: "DELETE" });
+  return fetchAPI(`/api/marketplace/products/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export async function getAllProducts(): Promise<CatalogProduct[]> {
+  return fetchAPI<CatalogProduct[]>("/api/marketplace/all-products");
 }
 
 // ---- Business Features ----
@@ -293,4 +304,22 @@ export async function getActionItems(district?: string, category?: string): Prom
   if (category) params.set("category", category);
   const query = params.toString();
   return fetchAPI<ActionItem[]>(`/api/impact/action-items${query ? `?${query}` : ""}`);
+}
+
+// Admin Users API
+export async function getAdminUsers(): Promise<AdminUser[]> {
+  return fetchAPI<AdminUser[]>("/api/admin/users");
+}
+
+export async function updateAdminUser(userId: number, data: any): Promise<{status: string, message: string}> {
+  return fetchAPI<{status: string, message: string}>(`/api/admin/users/${userId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteAdminUser(userId: number): Promise<{status: string, message: string}> {
+  return fetchAPI<{status: string, message: string}>(`/api/admin/users/${userId}`, {
+    method: "DELETE",
+  });
 }

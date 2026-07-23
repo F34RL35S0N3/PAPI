@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from typing import List, Optional
 
 from database.connection import get_db
@@ -31,6 +32,7 @@ class ProductCreate(BaseModel):
     price: float
     stock: int
     description: Optional[str] = None
+    image_url: Optional[str] = None
 
 class ProductResponse(ProductCreate):
     id: int
@@ -138,7 +140,8 @@ async def add_product(
         category=prod_data.category,
         price=prod_data.price,
         stock=prod_data.stock,
-        description=prod_data.description
+        description=prod_data.description,
+        image_url=prod_data.image_url
     )
     db.add(new_prod)
     await db.commit()
@@ -174,6 +177,8 @@ async def update_product(
     product.price = prod_data.price
     product.stock = prod_data.stock
     product.description = prod_data.description
+    if prod_data.image_url is not None:
+        product.image_url = prod_data.image_url
 
     await db.commit()
     await db.refresh(product)
@@ -205,3 +210,32 @@ async def delete_product(
     await db.delete(product)
     await db.commit()
     return {"message": "Produk berhasil dihapus"}
+
+@router.get("/all-products")
+async def get_all_products(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get all products from all shops globally."""
+    result = await db.execute(
+        select(LocalProduct).options(selectinload(LocalProduct.shop))
+    )
+    products = result.scalars().all()
+    
+    return [
+        {
+            "id": p.id,
+            "name": p.name,
+            "category": p.category,
+            "price": p.price,
+            "stock": p.stock,
+            "description": p.description,
+            "image_url": p.image_url,
+            "shop": {
+                "name": p.shop.name,
+                "district": p.shop.district,
+                "whatsapp": p.shop.whatsapp,
+            } if p.shop else None
+        }
+        for p in products
+    ]

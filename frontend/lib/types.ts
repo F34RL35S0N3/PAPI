@@ -58,6 +58,7 @@ export interface ChatMessage {
   id?: number;
   role: "user" | "assistant";
   content: string;
+  image?: string;
   timestamp?: string;
   products?: LocalProduct[];
 }
@@ -114,7 +115,24 @@ export interface LocalProduct {
   price: number;
   stock: number;
   description?: string;
+  image_url?: string;
+  created_at: string;
   shop: LocalShop;
+}
+
+export interface CatalogProduct {
+  id: number;
+  name: string;
+  category: string;
+  price: number;
+  stock: number;
+  description?: string;
+  image_url?: string;
+  shop?: {
+    name: string;
+    district: string;
+    whatsapp: string;
+  };
 }
 
 // Fitur 2: Smart Routing
@@ -205,4 +223,16 @@ export interface ActionItem {
   change_pct: number;
   last_updated: string | null;
   action_type: string;
+}
+
+// Admin User Management
+export interface AdminUser {
+  id: number;
+  username: string;
+  full_name: string;
+  email: string;
+  role: string;
+  profile_picture?: string;
+  address?: string;
+  district?: string;
 }

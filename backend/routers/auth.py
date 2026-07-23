@@ -29,6 +29,8 @@ class UserCreate(BaseModel):
     email: str
     password: str
     role: str = "merchant"  # merchant | buyer | admin
+    address: str | None = None
+    district: str | None = None
 
 class UserResponse(BaseModel):
     id: int
@@ -37,6 +39,8 @@ class UserResponse(BaseModel):
     email: str
     role: str = "merchant"
     profile_picture: str | None = None
+    address: str | None = None
+    district: str | None = None
     
     class Config:
         from_attributes = True
@@ -121,12 +125,20 @@ async def update_profile(
     full_name: str = Form(None),
     email: str = Form(None),
     password: str = Form(None),
+    address: str = Form(None),
+    district: str = Form(None),
     profile_picture: UploadFile = File(None),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     if full_name is not None:
         current_user.full_name = full_name
+        
+    if address is not None:
+        current_user.address = address
+        
+    if district is not None:
+        current_user.district = district
 
     if email:
         # Check if email is taken by someone else

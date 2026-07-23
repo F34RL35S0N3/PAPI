@@ -5,6 +5,7 @@ AI-powered copywriting for online marketplace listings.
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.connection import get_db
 from services.ai_service import generate_product_description

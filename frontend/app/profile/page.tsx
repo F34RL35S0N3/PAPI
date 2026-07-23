@@ -9,7 +9,10 @@ type UserProfile = {
   username: string;
   full_name?: string | null;
   email: string;
+  role?: string;
   profile_picture?: string | null;
+  address?: string | null;
+  district?: string | null;
 };
 
 type Message = {
@@ -22,6 +25,8 @@ export default function ProfilePage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [address, setAddress] = useState("");
+  const [district, setDistrict] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<Message>({ text: "", type: "" });
@@ -51,6 +56,8 @@ export default function ProfilePage() {
         setUser(data);
         setFullName(data.full_name || "");
         setEmail(data.email);
+        setAddress(data.address || "");
+        setDistrict(data.district || "");
       } catch {
         localStorage.removeItem("token");
         router.push("/login");
@@ -75,6 +82,8 @@ export default function ProfilePage() {
       if (fullName !== (user.full_name || "")) formData.append("full_name", fullName);
       if (email !== user.email) formData.append("email", email);
       if (password) formData.append("password", password);
+      if (address !== (user.address || "")) formData.append("address", address);
+      if (district !== (user.district || "")) formData.append("district", district);
       if (fileInputRef.current?.files?.[0]) {
         formData.append("profile_picture", fileInputRef.current.files[0]);
       }
@@ -267,6 +276,34 @@ export default function ProfilePage() {
                   className="field-input"
                 />
               </Field>
+
+              {user.role === "buyer" && (
+                <div className="grid gap-5 md:grid-cols-2">
+                  <Field label="Kecamatan Domisili (Solo Raya)">
+                    <select
+                      value={district}
+                      onChange={(event) => setDistrict(event.target.value)}
+                      className="field-input"
+                    >
+                      <option value="">Pilih Kecamatan...</option>
+                      <option value="Banjarsari">Banjarsari</option>
+                      <option value="Jebres">Jebres</option>
+                      <option value="Laweyan">Laweyan</option>
+                      <option value="Pasar Kliwon">Pasar Kliwon</option>
+                      <option value="Serengan">Serengan</option>
+                    </select>
+                  </Field>
+
+                  <Field label="Alamat Lengkap">
+                    <textarea
+                      value={address}
+                      onChange={(event) => setAddress(event.target.value)}
+                      className="field-input min-h-[100px]"
+                      placeholder="Contoh: Jl. Slamet Riyadi No. 123..."
+                    />
+                  </Field>
+                </div>
+              )}
 
               <div className="rounded-[1.5rem] bg-white/45 p-5 ring-1 ring-white/70">
                 <h3 className="text-lg font-black text-slate-950">
