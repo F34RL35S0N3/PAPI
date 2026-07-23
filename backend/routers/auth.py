@@ -1,26 +1,27 @@
-from datetime import datetime, timedelta
-from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_
 import os
 import shutil
+from datetime import datetime, timedelta
+from typing import Annotated
 
 from database.connection import get_db
 from database.models import User
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from pydantic import BaseModel
 from services.auth_service import (
-    get_password_hash,
-    verify_password,
+    ACCESS_TOKEN_EXPIRE_MINUTES,
     create_access_token,
     decode_access_token,
-    ACCESS_TOKEN_EXPIRE_MINUTES
+    get_password_hash,
+    verify_password,
 )
-from pydantic import BaseModel
+from sqlalchemy import or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+
 
 # Pydantic models for request/response
 class UserCreate(BaseModel):
@@ -32,6 +33,7 @@ class UserCreate(BaseModel):
     address: str | None = None
     district: str | None = None
 
+
 class UserResponse(BaseModel):
     id: int
     username: str
@@ -41,24 +43,25 @@ class UserResponse(BaseModel):
     profile_picture: str | None = None
     address: str | None = None
     district: str | None = None
-    
+
     class Config:
         from_attributes = True
+
 
 class Token(BaseModel):
     access_token: str
     token_type: str
 
+
 # Dependency to get current user
 async def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)],
-    db: AsyncSession = Depends(get_db)
+    token: Annotated[str, Depends(oauth2_scheme)], db: AsyncSession = Depends(get_db)
 ):
     payload = decode_access_token(token)
     username: str = payload.get("sub")
     if username is None:
         raise HTTPException(status_code=401, detail="Could not validate credentials")
-    
+
     result = await db.execute(select(User).where(User.username == username))
     user = result.scalars().first()
     if user is None:
@@ -76,17 +79,21 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     )
     db_user = result.scalars().first()
     if db_user:
-        raise HTTPException(status_code=400, detail="Username or email already registered")
-    
+        raise HTTPException(
+            status_code=400, detail="Username or email already registered"
+        )
+
     if user_data.role not in ("merchant", "buyer", "admin"):
-        raise HTTPException(status_code=400, detail="Role harus merchant, buyer, atau admin")
+        raise HTTPException(
+            status_code=400, detail="Role harus merchant, buyer, atau admin"
+        )
     hashed_password = get_password_hash(user_data.password)
     new_user = User(
         username=user_data.username,
         full_name=user_data.full_name,
         email=user_data.email,
         password_hash=hashed_password,
-        role=user_data.role
+        role=user_data.role,
     )
     db.add(new_user)
     await db.commit()
@@ -97,7 +104,7 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
 @router.post("/login", response_model=Token)
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(select(User).where(User.username == form_data.username))
     user = result.scalars().first()
@@ -107,10 +114,11 @@ async def login(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username, "role": user.role}, expires_delta=access_token_expires
+        data={"sub": user.username, "role": user.role},
+        expires_delta=access_token_expires,
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -129,14 +137,14 @@ async def update_profile(
     district: str = Form(None),
     profile_picture: UploadFile = File(None),
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     if full_name is not None:
         current_user.full_name = full_name
-        
+
     if address is not None:
         current_user.address = address
-        
+
     if district is not None:
         current_user.district = district
 
@@ -149,25 +157,39 @@ async def update_profile(
         if existing:
             raise HTTPException(status_code=400, detail="Email already in use")
         current_user.email = email
-        
+
     if password:
         current_user.password_hash = get_password_hash(password)
-        
-    if profile_picture:
-        # Save file to static/profiles
-        upload_dir = os.path.join(os.getcwd(), "static", "profiles")
-        os.makedirs(upload_dir, exist_ok=True)
-        
+
+    if profile_picture and profile_picture.filename:
+        # Validate file extension
+        ALLOWED_EXT = {"jpg", "jpeg", "png", "gif", "webp"}
+        ext = profile_picture.filename.rsplit(".", 1)[-1].lower()
+        if ext not in ALLOWED_EXT:
+            raise HTTPException(
+                status_code=400,
+                detail="Format file tidak didukung. Gunakan JPG, PNG, GIF, atau WEBP.",
+            )
+
+        # Save file to static/profiles (path absolute so CWD doesn't matter)
+        import pathlib
+
+        upload_dir = (
+            pathlib.Path(__file__).resolve().parent.parent / "static" / "profiles"
+        )
+        upload_dir.mkdir(parents=True, exist_ok=True)
+
         # Create safe filename
-        ext = profile_picture.filename.split(".")[-1]
-        filename = f"user_{current_user.id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.{ext}"
+        filename = (
+            f"user_{current_user.id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.{ext}"
+        )
         filepath = os.path.join(upload_dir, filename)
-        
+
         with open(filepath, "wb") as buffer:
             shutil.copyfileobj(profile_picture.file, buffer)
-            
+
         current_user.profile_picture = f"/static/profiles/{filename}"
-        
+
     await db.commit()
     await db.refresh(current_user)
     return current_user

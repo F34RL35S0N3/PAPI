@@ -4,18 +4,19 @@ Integrates with Google Gemini API for fast LLM inference.
 """
 
 import os
+import pathlib
 
 import google.generativeai as genai
 from dotenv import dotenv_values
 
 
 def get_config():
-    config = dotenv_values(r"d:\Code\Bytefest\PPA\backend\.env")
+    # Resolve path relative to this file so it works on any machine/OS
+    env_path = pathlib.Path(__file__).resolve().parent.parent / ".env"
+    config = dotenv_values(env_path)
     return {
         "GEMINI_API_KEY": config.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", "")),
-        "AI_MODEL": config.get(
-            "AI_MODEL", os.getenv("AI_MODEL", "gemini-flash-latest")
-        ),
+        "AI_MODEL": config.get("AI_MODEL", os.getenv("AI_MODEL", "gemini-2.0-flash")),
     }
 
 

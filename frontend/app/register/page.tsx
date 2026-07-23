@@ -20,7 +20,9 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:8000/api/auth/register", {
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(`${API_URL}/api/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -44,7 +46,7 @@ export default function RegisterPage() {
       formData.append("username", username);
       formData.append("password", password);
 
-      const loginResponse = await fetch("http://localhost:8000/api/auth/login", {
+      const loginResponse = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -65,7 +67,7 @@ export default function RegisterPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "Terjadi kesalahan saat mendaftar."
+          : "Terjadi kesalahan saat mendaftar.",
       );
     } finally {
       setLoading(false);
@@ -97,12 +99,29 @@ export default function RegisterPage() {
               {error && <Notice>{error}</Notice>}
 
               <div>
-                <span className="mb-3 block text-sm font-bold text-slate-600">Pilih Peran Anda</span>
+                <span className="mb-3 block text-sm font-bold text-slate-600">
+                  Pilih Peran Anda
+                </span>
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { value: "merchant", label: "Pedagang", emoji: "🏪", desc: "Pelaku UMKM" },
-                    { value: "buyer", label: "Pembeli", emoji: "🛒", desc: "Konsumen Lokal" },
-                    { value: "admin", label: "Admin", emoji: "🛡️", desc: "Dinas/Sistem" },
+                    {
+                      value: "merchant",
+                      label: "Pedagang",
+                      emoji: "🏪",
+                      desc: "Pelaku UMKM",
+                    },
+                    {
+                      value: "buyer",
+                      label: "Pembeli",
+                      emoji: "🛒",
+                      desc: "Konsumen Lokal",
+                    },
+                    {
+                      value: "admin",
+                      label: "Admin",
+                      emoji: "🛡️",
+                      desc: "Dinas/Sistem",
+                    },
                   ].map((r) => (
                     <button
                       key={r.value}
@@ -116,7 +135,11 @@ export default function RegisterPage() {
                     >
                       <span className="text-2xl">{r.emoji}</span>
                       <span className="text-xs font-black">{r.label}</span>
-                      <span className={`text-[10px] ${role === r.value ? "text-slate-300" : "text-slate-400"}`}>{r.desc}</span>
+                      <span
+                        className={`text-[10px] ${role === r.value ? "text-slate-300" : "text-slate-400"}`}
+                      >
+                        {r.desc}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -214,7 +237,9 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-bold text-slate-600">{label}</span>
+      <span className="mb-2 block text-sm font-bold text-slate-600">
+        {label}
+      </span>
       {children}
     </label>
   );

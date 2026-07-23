@@ -42,7 +42,9 @@ export default function ProfilePage() {
       }
 
       try {
-        const response = await fetch("http://localhost:8000/api/auth/profile", {
+        const API_URL =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const response = await fetch(`${API_URL}/api/auth/profile`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -79,11 +81,13 @@ export default function ProfilePage() {
 
     try {
       const formData = new FormData();
-      if (fullName !== (user.full_name || "")) formData.append("full_name", fullName);
+      if (fullName !== (user.full_name || ""))
+        formData.append("full_name", fullName);
       if (email !== user.email) formData.append("email", email);
       if (password) formData.append("password", password);
       if (address !== (user.address || "")) formData.append("address", address);
-      if (district !== (user.district || "")) formData.append("district", district);
+      if (district !== (user.district || ""))
+        formData.append("district", district);
       if (fileInputRef.current?.files?.[0]) {
         formData.append("profile_picture", fileInputRef.current.files[0]);
       }
@@ -94,7 +98,9 @@ export default function ProfilePage() {
         return;
       }
 
-      const response = await fetch("http://localhost:8000/api/auth/profile", {
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(`${API_URL}/api/auth/profile`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -150,8 +156,9 @@ export default function ProfilePage() {
 
   const displayName = user.full_name || user.username;
   const initial = displayName.charAt(0).toUpperCase();
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const imageUrl = user.profile_picture
-    ? `http://localhost:8000${user.profile_picture}`
+    ? `${API_URL}${user.profile_picture}`
     : "";
 
   return (
@@ -160,7 +167,11 @@ export default function ProfilePage() {
       <section className="relative z-10 mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:py-8">
         <header className="glass-panel mb-6 flex items-center justify-between gap-4 rounded-[1.75rem] px-4 py-3 sm:px-5">
           <div className="flex min-w-0 items-center gap-3">
-            <Link href="/" className="icon-button" aria-label="Kembali dashboard">
+            <Link
+              href="/"
+              className="icon-button"
+              aria-label="Kembali dashboard"
+            >
               <ArrowLeftIcon />
             </Link>
             <div className="min-w-0">
@@ -361,7 +372,9 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-bold text-slate-600">{label}</span>
+      <span className="mb-2 block text-sm font-bold text-slate-600">
+        {label}
+      </span>
       {children}
     </label>
   );
@@ -380,7 +393,9 @@ function Notice({
       : "border-red-200/80 bg-red-50/70 text-red-600";
 
   return (
-    <div className={`mb-5 rounded-2xl border px-4 py-3 text-sm font-semibold ${className}`}>
+    <div
+      className={`mb-5 rounded-2xl border px-4 py-3 text-sm font-semibold ${className}`}
+    >
       {children}
     </div>
   );

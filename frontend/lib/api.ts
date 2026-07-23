@@ -17,8 +17,12 @@ import type {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+async function fetchAPI<T>(
+  endpoint: string,
+  options?: RequestInit,
+): Promise<T> {
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
   const headers = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -34,6 +38,16 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
     throw new Error(`API Error: ${res.status} ${res.statusText}`);
   }
 
+  // Handle empty responses (204 No Content or empty body)
+  const contentType = res.headers.get("content-type");
+  if (
+    res.status === 204 ||
+    !contentType ||
+    !contentType.includes("application/json")
+  ) {
+    return undefined as T;
+  }
+
   return res.json();
 }
 
@@ -41,20 +55,29 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
 export async function sendChatMessage(
   message: string,
   sessionId: string = "default",
-  visionContext?: string
+  visionContext?: string,
 ): Promise<ChatResponse> {
   return fetchAPI<ChatResponse>("/api/chat/send", {
     method: "POST",
-    body: JSON.stringify({ message, session_id: sessionId, vision_context: visionContext }),
+    body: JSON.stringify({
+      message,
+      session_id: sessionId,
+      vision_context: visionContext,
+    }),
   });
 }
 
 export async function getChatHistory(
   sessionId: string = "default",
-  limit: number = 20
+  limit: number = 20,
 ) {
   return fetchAPI<
-    { id: number; user_message: string; ai_response: string; created_at: string }[]
+    {
+      id: number;
+      user_message: string;
+      ai_response: string;
+      created_at: string;
+    }[]
   >(`/api/chat/history/${sessionId}?limit=${limit}`);
 }
 
@@ -75,17 +98,20 @@ export async function getPriceHistory(params?: {
   source?: string;
 }): Promise<PriceHistory[]> {
   const searchParams = new URLSearchParams();
-  if (params?.product_id) searchParams.set("product_id", String(params.product_id));
+  if (params?.product_id)
+    searchParams.set("product_id", String(params.product_id));
   if (params?.category) searchParams.set("category", params.category);
   if (params?.weeks) searchParams.set("weeks", String(params.weeks));
   if (params?.source) searchParams.set("source", params.source);
 
   const query = searchParams.toString();
-  return fetchAPI<PriceHistory[]>(`/api/prices/history${query ? `?${query}` : ""}`);
+  return fetchAPI<PriceHistory[]>(
+    `/api/prices/history${query ? `?${query}` : ""}`,
+  );
 }
 
 export async function getPriceSummary(
-  category?: string
+  category?: string,
 ): Promise<PriceSummary[]> {
   const params = category ? `?category=${category}` : "";
   return fetchAPI<PriceSummary[]>(`/api/prices/summary${params}`);
@@ -97,7 +123,7 @@ export async function getCategories(): Promise<Category[]> {
 
 // ---- Recommendations ----
 export async function getRecommendations(
-  category?: string
+  category?: string,
 ): Promise<Recommendation[]> {
   const params = category ? `?category=${category}` : "";
   return fetchAPI<Recommendation[]>(`/api/recommendations/${params}`);
@@ -108,7 +134,7 @@ export async function generateDescription(
   productName: string,
   category: string = "",
   additionalInfo: string = "",
-  image: string | null = null
+  image: string | null = null,
 ): Promise<DescriptionResponse> {
   return fetchAPI<DescriptionResponse>("/api/descriptions/generate", {
     method: "POST",
@@ -123,11 +149,9 @@ export async function generateDescription(
 
 // ---- Alerts ----
 export async function getAlerts(
-  unreadOnly: boolean = false
+  unreadOnly: boolean = false,
 ): Promise<PriceAlert[]> {
-  return fetchAPI<PriceAlert[]>(
-    `/api/alerts/?unread_only=${unreadOnly}`
-  );
+  return fetchAPI<PriceAlert[]>(`/api/alerts/?unread_only=${unreadOnly}`);
 }
 
 export async function getAlertCount(): Promise<{ unread_count: number }> {
@@ -141,7 +165,9 @@ export async function markAlertRead(alertId: number): Promise<void> {
 // ---- Routing ----
 import type { OptimizeResponse } from "./types";
 
-export async function optimizeRoute(destinations: string[]): Promise<OptimizeResponse> {
+export async function optimizeRoute(
+  destinations: string[],
+): Promise<OptimizeResponse> {
   return fetchAPI<OptimizeResponse>("/api/routes/optimize", {
     method: "POST",
     body: JSON.stringify({ destinations }),
@@ -194,7 +220,7 @@ export async function updateMyProduct(
     stock: number;
     description?: string;
     image_url?: string;
-  }
+  },
 ): Promise<LocalProduct> {
   return fetchAPI<LocalProduct>(`/api/marketplace/products/${id}`, {
     method: "PUT",
@@ -213,7 +239,12 @@ export async function getAllProducts(): Promise<CatalogProduct[]> {
 }
 
 // ---- Business Features ----
-import type { HealthScore, PricingAdvice, SimulationResult, CopilotAction } from "./types";
+import type {
+  HealthScore,
+  PricingAdvice,
+  SimulationResult,
+  CopilotAction,
+} from "./types";
 
 export async function getHealthScore(data: {
   product_name: string;
@@ -258,13 +289,15 @@ export async function runSimulation(data: {
   });
 }
 
-export async function getCopilotPlan(products: {
-  name: string;
-  capital_price: number;
-  selling_price: number;
-  target_margin: number;
-  trend: string;
-}[]): Promise<CopilotAction[]> {
+export async function getCopilotPlan(
+  products: {
+    name: string;
+    capital_price: number;
+    selling_price: number;
+    target_margin: number;
+    trend: string;
+  }[],
+): Promise<CopilotAction[]> {
   return fetchAPI<CopilotAction[]>("/api/business/copilot", {
     method: "POST",
     body: JSON.stringify({ products }),
@@ -272,16 +305,27 @@ export async function getCopilotPlan(products: {
 }
 
 // ---- Constraint 1: Activity Logging ----
-import type { ActivityLogEntry, ActivityStats, ImpactMetrics, ActionItem } from "./types";
+import type {
+  ActivityLogEntry,
+  ActivityStats,
+  ImpactMetrics,
+  ActionItem,
+} from "./types";
 
-export async function logActivity(data: { activity_type: string; detail?: string; status?: string }): Promise<void> {
+export async function logActivity(data: {
+  activity_type: string;
+  detail?: string;
+  status?: string;
+}): Promise<void> {
   await fetchAPI("/api/activity/log", {
     method: "POST",
     body: JSON.stringify(data),
   });
 }
 
-export async function getActivityLogs(limit: number = 30): Promise<ActivityLogEntry[]> {
+export async function getActivityLogs(
+  limit: number = 30,
+): Promise<ActivityLogEntry[]> {
   return fetchAPI<ActivityLogEntry[]>(`/api/activity/logs?limit=${limit}`);
 }
 
@@ -290,20 +334,30 @@ export async function getActivityStats(): Promise<ActivityStats> {
 }
 
 // ---- Constraint 2: Impact Dashboard ----
-export async function getImpactMetrics(district?: string, category?: string): Promise<ImpactMetrics> {
+export async function getImpactMetrics(
+  district?: string,
+  category?: string,
+): Promise<ImpactMetrics> {
   const params = new URLSearchParams();
   if (district) params.set("district", district);
   if (category) params.set("category", category);
   const query = params.toString();
-  return fetchAPI<ImpactMetrics>(`/api/impact/metrics${query ? `?${query}` : ""}`);
+  return fetchAPI<ImpactMetrics>(
+    `/api/impact/metrics${query ? `?${query}` : ""}`,
+  );
 }
 
-export async function getActionItems(district?: string, category?: string): Promise<ActionItem[]> {
+export async function getActionItems(
+  district?: string,
+  category?: string,
+): Promise<ActionItem[]> {
   const params = new URLSearchParams();
   if (district) params.set("district", district);
   if (category) params.set("category", category);
   const query = params.toString();
-  return fetchAPI<ActionItem[]>(`/api/impact/action-items${query ? `?${query}` : ""}`);
+  return fetchAPI<ActionItem[]>(
+    `/api/impact/action-items${query ? `?${query}` : ""}`,
+  );
 }
 
 // Admin Users API
@@ -311,15 +365,26 @@ export async function getAdminUsers(): Promise<AdminUser[]> {
   return fetchAPI<AdminUser[]>("/api/admin/users");
 }
 
-export async function updateAdminUser(userId: number, data: any): Promise<{status: string, message: string}> {
-  return fetchAPI<{status: string, message: string}>(`/api/admin/users/${userId}`, {
-    method: "PUT",
-    body: JSON.stringify(data),
-  });
+export async function updateAdminUser(
+  userId: number,
+  data: any,
+): Promise<{ status: string; message: string }> {
+  return fetchAPI<{ status: string; message: string }>(
+    `/api/admin/users/${userId}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(data),
+    },
+  );
 }
 
-export async function deleteAdminUser(userId: number): Promise<{status: string, message: string}> {
-  return fetchAPI<{status: string, message: string}>(`/api/admin/users/${userId}`, {
-    method: "DELETE",
-  });
+export async function deleteAdminUser(
+  userId: number,
+): Promise<{ status: string; message: string }> {
+  return fetchAPI<{ status: string; message: string }>(
+    `/api/admin/users/${userId}`,
+    {
+      method: "DELETE",
+    },
+  );
 }

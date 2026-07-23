@@ -8,36 +8,39 @@ Hackathon BYTESFEST 2026 — SDG 8: Decent Work and Economic Growth
 """
 
 import os
+import pathlib
 from contextlib import asynccontextmanager
+
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
 
 load_dotenv()
 
 # Import database
-from database.connection import init_db, async_session
-from database.seed_data import seed_database
 import asyncio
-from worker import background_market_worker
+
+from database.connection import async_session, init_db
+from database.seed_data import seed_database
+from fastapi.staticfiles import StaticFiles
+from routers.activity_log import router as activity_log_router
+from routers.admin_users import router as admin_users_router
+from routers.alerts import router as alerts_router
+from routers.auth import router as auth_router
 
 # Import routers
 from routers.chat import router as chat_router
-from routers.prices import router as prices_router
-from routers.recommendations import router as recommendations_router
-from routers.descriptions import router as descriptions_router
-from routers.alerts import router as alerts_router
-from routers.auth import router as auth_router
-from routers.routes import router as routes_router
-from routers.marketplace import router as marketplace_router
-from routers.health_score import router as health_score_router
-from routers.pricing_advisor import router as pricing_advisor_router
-from routers.simulator import router as simulator_router
 from routers.copilot import router as copilot_router
-from routers.activity_log import router as activity_log_router
+from routers.descriptions import router as descriptions_router
+from routers.health_score import router as health_score_router
 from routers.impact_dashboard import router as impact_dashboard_router
-from routers.admin_users import router as admin_users_router
-from fastapi.staticfiles import StaticFiles
+from routers.marketplace import router as marketplace_router
+from routers.prices import router as prices_router
+from routers.pricing_advisor import router as pricing_advisor_router
+from routers.recommendations import router as recommendations_router
+from routers.routes import router as routes_router
+from routers.simulator import router as simulator_router
+from worker import background_market_worker
 
 # Create static directory if it doesn't exist
 os.makedirs(os.path.join(os.getcwd(), "static", "profiles"), exist_ok=True)
@@ -61,7 +64,7 @@ async def lifespan(app: FastAPI):
 
     print("[OK] PasarPintar AI Backend is ready!")
     print("[DOCS] API docs available at: http://localhost:8000/docs")
-    
+
     yield
 
     # === SHUTDOWN ===
@@ -114,8 +117,10 @@ app.include_router(activity_log_router)
 app.include_router(impact_dashboard_router)
 app.include_router(admin_users_router)
 
-# Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Mount static files — use absolute path so it works regardless of working directory
+_STATIC_DIR = pathlib.Path(__file__).resolve().parent / "static"
+_STATIC_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
 
 
 @app.get("/", tags=["Root"])

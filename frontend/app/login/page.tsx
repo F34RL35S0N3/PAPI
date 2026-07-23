@@ -21,7 +21,9 @@ export default function LoginPage() {
       formData.append("username", username);
       formData.append("password", password);
 
-      const response = await fetch("http://localhost:8000/api/auth/login", {
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -117,11 +119,14 @@ export default function LoginPage() {
 function AuthBackground() {
   return (
     <div className="pointer-events-none fixed inset-0 overflow-hidden">
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: 'url("/keraton.jpg")' }}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950" />
+      <div
+        className="absolute inset-0 opacity-30"
+        style={{
+          backgroundImage:
+            "radial-gradient(ellipse at 20% 50%, #7c3aed55 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, #1e40af44 0%, transparent 50%), radial-gradient(ellipse at 60% 80%, #065f4633 0%, transparent 50%)",
+        }}
       />
-      <div className="absolute inset-0 bg-slate-900/30" />
     </div>
   );
 }
@@ -135,7 +140,9 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-bold text-slate-200">{label}</span>
+      <span className="mb-2 block text-sm font-bold text-slate-200">
+        {label}
+      </span>
       {children}
     </label>
   );
@@ -154,7 +161,9 @@ function Notice({
       : "border-emerald-200/80 bg-emerald-50/70 text-emerald-700";
 
   return (
-    <div className={`rounded-2xl border px-4 py-3 text-sm font-semibold ${className}`}>
+    <div
+      className={`rounded-2xl border px-4 py-3 text-sm font-semibold ${className}`}
+    >
       {children}
     </div>
   );

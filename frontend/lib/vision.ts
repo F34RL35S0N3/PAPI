@@ -1,30 +1,34 @@
 // Type-only import: erased at runtime, safe for SSR
 import type { CustomMobileNet } from "@teachablemachine/image";
 
-let model: CustomMobileNet | null = null;
 const MODEL_URL = "/model/";
 
-export async function loadVisionModel(): Promise<CustomMobileNet | null> {
-  if (model) return model;
-  try {
-    // Dynamic import at runtime to avoid SSR/build failures (TF.js needs browser APIs)
-    const tmImage = await import("@teachablemachine/image");
-    const modelURL = MODEL_URL + "model.json";
-    const metadataURL = MODEL_URL + "metadata.json";
-    model = await tmImage.load(modelURL, metadataURL);
-    return model;
-  } catch (e) {
-    console.error("Error loading vision model:", e);
-    return null;
+// Cache the loading promise to prevent duplicate loads (race condition fix)
+let modelPromise: Promise<CustomMobileNet | null> | null = null;
+
+export function loadVisionModel(): Promise<CustomMobileNet | null> {
+  if (!modelPromise) {
+    modelPromise = (async () => {
+      try {
+        // Dynamic import at runtime to avoid SSR/build failures (TF.js needs browser APIs)
+        const tmImage = await import("@teachablemachine/image");
+        const modelURL = MODEL_URL + "model.json";
+        const metadataURL = MODEL_URL + "metadata.json";
+        return await tmImage.load(modelURL, metadataURL);
+      } catch (e) {
+        console.error("Error loading vision model:", e);
+        modelPromise = null; // Reset so it can be retried
+        return null;
+      }
+    })();
   }
+  return modelPromise;
 }
 
 export async function scanBatikImage(
   imageElement: HTMLImageElement,
 ): Promise<string> {
-  if (!model) {
-    await loadVisionModel();
-  }
+  const model = await loadVisionModel();
 
   if (!model) {
     return "Sistem Visi Komputer tidak tersedia (Model tidak ditemukan).";
