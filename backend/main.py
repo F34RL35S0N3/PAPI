@@ -55,21 +55,25 @@ async def lifespan(app: FastAPI):
     await init_db()
 
     # Seed database with market data
-    async with async_session() as session:
-        await seed_database(session)
+    try:
+        async with async_session() as session:
+            await seed_database(session)
+    except Exception as e:
+        print(f"[DB] Seed skipped or error: {e}")
 
-    # Start the Live Data Background Worker
-    worker_task = asyncio.create_task(background_market_worker())
-    app.state.worker_task = worker_task
+    # Start the Live Data Background Worker if not running on Vercel Serverless
+    is_vercel = os.getenv("VERCEL") == "1" or os.getenv("VERCEL_ENV") is not None
+    if not is_vercel:
+        worker_task = asyncio.create_task(background_market_worker())
+        app.state.worker_task = worker_task
 
     print("[OK] PasarPintar AI Backend is ready!")
-    print("[DOCS] API docs available at: http://localhost:8000/docs")
-
     yield
 
     # === SHUTDOWN ===
-    print("[STOP] Shutting down PasarPintar AI Backend...")
-    app.state.worker_task.cancel()
+    if not is_vercel and hasattr(app.state, "worker_task"):
+        print("[STOP] Shutting down PasarPintar AI Backend...")
+        app.state.worker_task.cancel()
 
 
 # Create FastAPI app
