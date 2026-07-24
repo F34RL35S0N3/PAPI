@@ -3556,6 +3556,29 @@ function CopilotView() {
   const [score, setScore] = useState(62);
   const [targetScore, setTargetScore] = useState(62);
   const [removingId, setRemovingId] = useState<number | null>(null);
+  const [userName, setUserName] = useState<string>("Pedagang");
+
+  useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    if (token) {
+      const API_URL = getApiUrl();
+      fetch(`${API_URL}/api/auth/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Bypass-Tunnel-Remainder": "true",
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.full_name) {
+            setUserName(data.full_name);
+          } else if (data && data.username) {
+            setUserName(data.username);
+          }
+        })
+        .catch(console.error);
+    }
+  }, []);
 
   const fetchPlan = async () => {
     setLoading(true);
@@ -3659,7 +3682,7 @@ function CopilotView() {
       <div className="glass-card bg-white/70 backdrop-blur-xl p-6 rounded-3xl mb-8 flex justify-between items-center ring-1 ring-slate-100 shadow-sm">
         <div>
           <h2 className="text-2xl font-black text-slate-800 tracking-tight">
-            Sugeng Enjang, Bu Sri! ☀️
+            Sugeng Enjang, {userName}! ☀️
           </h2>
           <p className="text-sm font-medium text-slate-500 mt-1">
             Ini daftar prioritas agar jualanmu hari ini makin laris.
