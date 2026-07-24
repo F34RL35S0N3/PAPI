@@ -27,6 +27,7 @@ export default function RegisterPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Bypass-Tunnel-Remainder": "true",
         },
         body: JSON.stringify({
           username,

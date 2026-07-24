@@ -28,6 +28,7 @@ export default function LoginPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
+          "Bypass-Tunnel-Remainder": "true",
         },
         body: formData.toString(),
       });

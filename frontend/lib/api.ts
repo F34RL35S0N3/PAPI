@@ -27,6 +27,7 @@ async function fetchAPI<T>(
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
   const headers = {
     "Content-Type": "application/json",
+    "Bypass-Tunnel-Remainder": "true",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options?.headers,
   };
