@@ -61,9 +61,13 @@ export default function LoginPage() {
           <div className="mb-7 text-center">
             <Link
               href="/"
-              className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#1c1c1e] text-sm font-black text-white shadow-xl shadow-slate-900/15"
+              className="mx-auto block h-16 w-16 overflow-hidden rounded-2xl shadow-xl shadow-slate-950/30 transition-transform hover:scale-105"
             >
-              PP
+              <img
+                src="/logo_papi.png"
+                alt="PasarPintar AI Logo"
+                className="h-full w-full object-cover"
+              />
             </Link>
             <h1 className="mt-5 text-3xl font-black text-white">
               Login ke PasarPintar AI

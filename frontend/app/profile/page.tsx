@@ -139,8 +139,12 @@ export default function ProfilePage() {
         <AuthBackground />
         <div className="relative z-10 flex min-h-screen items-center justify-center">
           <div className="glass-panel rounded-[2rem] px-8 py-7 text-center">
-            <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-[#1c1c1e] font-black text-white">
-              PP
+            <div className="mx-auto mb-4 block h-14 w-14 overflow-hidden rounded-2xl shadow-md">
+              <img
+                src="/logo_papi.png"
+                alt="PasarPintar AI Logo"
+                className="h-full w-full object-cover"
+              />
             </div>
             <p className="text-sm font-semibold text-slate-500">
               Memuat profil...
