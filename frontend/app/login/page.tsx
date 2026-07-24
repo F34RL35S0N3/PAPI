@@ -127,7 +127,12 @@ export default function LoginPage() {
 function AuthBackground() {
   return (
     <div className="pointer-events-none fixed inset-0 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950" />
+      {/* Background Image with subtle blur */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat filter blur-md scale-105 transform opacity-40"
+        style={{ backgroundImage: "url('/model/bg.jpeg')" }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-950/80 via-slate-900/70 to-slate-950/90" />
       <div
         className="absolute inset-0 opacity-30"
         style={{
