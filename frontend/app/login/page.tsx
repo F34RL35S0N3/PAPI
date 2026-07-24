@@ -126,15 +126,16 @@ export default function LoginPage() {
 
 function AuthBackground() {
   return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden">
+    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
       {/* Background Image with soft blur & high visibility */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat filter blur-[4px] scale-105 transform opacity-75"
-        style={{ backgroundImage: "url('/bg.jpeg')" }}
+      <img
+        src="/bg.jpeg"
+        alt="Background"
+        className="absolute inset-0 h-full w-full object-cover filter blur-[4px] scale-105 opacity-80"
       />
       {/* Vignette overlay for text readability */}
       <div className="absolute inset-0 bg-slate-950/45" />
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-slate-950/50" />
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/60" />
     </div>
   );
 }

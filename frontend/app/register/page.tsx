@@ -227,12 +227,13 @@ export default function RegisterPage() {
 
 function AuthBackground() {
   return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden">
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat filter blur-md scale-105 transform opacity-30"
-        style={{ backgroundImage: "url('/model/bg.jpeg')" }}
+    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+      <img
+        src="/bg.jpeg"
+        alt="Background"
+        className="absolute inset-0 h-full w-full object-cover filter blur-[4px] scale-105 opacity-40"
       />
-      <div className="absolute inset-0 bg-[#f7f8fc]/80" />
+      <div className="absolute inset-0 bg-[#f7f8fc]/70" />
       <div className="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-sky-200/70 blur-3xl" />
       <div className="absolute right-[-10%] top-12 h-[28rem] w-[28rem] rounded-full bg-orange-200/60 blur-3xl" />
       <div className="absolute bottom-[-12rem] left-1/3 h-[30rem] w-[30rem] rounded-full bg-violet-200/60 blur-3xl" />
