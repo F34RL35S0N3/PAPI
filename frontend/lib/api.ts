@@ -15,10 +15,9 @@ import type {
   CatalogProduct,
 } from "./types";
 
-const rawApiBase = process.env.NEXT_PUBLIC_API_URL !== undefined 
-  ? process.env.NEXT_PUBLIC_API_URL 
-  : (process.env.NODE_ENV === "production" ? "" : "http://localhost:8000");
-const API_BASE = rawApiBase.replace(/\/+$/, "");
+import { getApiUrl } from "./config";
+
+const API_BASE = getApiUrl();
 
 async function fetchAPI<T>(
   endpoint: string,

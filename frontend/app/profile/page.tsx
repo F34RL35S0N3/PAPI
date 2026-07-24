@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { getApiUrl } from "@/lib/config";
 
 type UserProfile = {
   id?: number;
@@ -42,9 +43,7 @@ export default function ProfilePage() {
       }
 
       try {
-        const rawApiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-        const API_URL = rawApiUrl.replace(/\/+$/, "");
+        const API_URL = getApiUrl();
         const response = await fetch(`${API_URL}/api/auth/profile`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -99,9 +98,7 @@ export default function ProfilePage() {
         return;
       }
 
-      const rawApiUrl =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const API_URL = rawApiUrl.replace(/\/+$/, "");
+      const API_URL = getApiUrl();
       const response = await fetch(`${API_URL}/api/auth/profile`, {
         method: "PUT",
         headers: {
@@ -158,7 +155,7 @@ export default function ProfilePage() {
 
   const displayName = user.full_name || user.username;
   const initial = displayName.charAt(0).toUpperCase();
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const API_URL = getApiUrl();
   const imageUrl = user.profile_picture
     ? `${API_URL}${user.profile_picture}`
     : "";

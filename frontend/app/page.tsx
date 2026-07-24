@@ -49,6 +49,7 @@ import {
   deleteAdminUser,
   getAllProducts,
 } from "@/lib/api";
+import { getApiUrl } from "@/lib/config";
 import { scanBatikImage } from "@/lib/vision";
 import type {
   ChartDataPoint,
@@ -167,8 +168,7 @@ export default function DashboardPage() {
     // Only fetch suggested questions once or separately, as they don't need SSE
     getSuggestedQuestions().then(setSuggestedQuestions).catch(console.error);
 
-    const category = activeCategory === "all" ? "" : activeCategory;
-    const url = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/prices/stream?category=${category}`;
+    const url = `${getApiUrl()}/api/prices/stream?category=${category}`;
 
     setIsLoading(true);
     const eventSource = new EventSource(url);
