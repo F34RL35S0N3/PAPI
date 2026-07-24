@@ -15,7 +15,8 @@ import type {
   CatalogProduct,
 } from "./types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const rawApiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = rawApiBase.replace(/\/+$/, "");
 
 async function fetchAPI<T>(
   endpoint: string,
@@ -29,10 +30,18 @@ async function fetchAPI<T>(
     ...options?.headers,
   };
 
-  const res = await fetch(`${API_BASE}${endpoint}`, {
-    headers,
-    ...options,
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${endpoint}`, {
+      headers,
+      ...options,
+    });
+  } catch (err) {
+    if (err instanceof Error && (err.name === "TypeError" || err.message === "Failed to fetch")) {
+      throw new Error("Gagal terhubung ke server API backend. Pastikan NEXT_PUBLIC_API_URL dikonfigurasi di Vercel.");
+    }
+    throw err;
+  }
 
   if (!res.ok) {
     throw new Error(`API Error: ${res.status} ${res.statusText}`);

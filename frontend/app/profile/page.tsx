@@ -42,8 +42,9 @@ export default function ProfilePage() {
       }
 
       try {
-        const API_URL =
+        const rawApiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const API_URL = rawApiUrl.replace(/\/+$/, "");
         const response = await fetch(`${API_URL}/api/auth/profile`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -98,8 +99,9 @@ export default function ProfilePage() {
         return;
       }
 
-      const API_URL =
+      const rawApiUrl =
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const API_URL = rawApiUrl.replace(/\/+$/, "");
       const response = await fetch(`${API_URL}/api/auth/profile`, {
         method: "PUT",
         headers: {

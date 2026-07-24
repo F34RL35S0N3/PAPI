@@ -20,8 +20,10 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      const API_URL =
+      const rawApiUrl =
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const API_URL = rawApiUrl.replace(/\/+$/, "");
+
       const response = await fetch(`${API_URL}/api/auth/register`, {
         method: "POST",
         headers: {
@@ -64,11 +66,17 @@ export default function RegisterPage() {
         router.push("/login");
       }
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Terjadi kesalahan saat mendaftar.",
-      );
+      if (err instanceof Error && (err.name === "TypeError" || err.message === "Failed to fetch")) {
+        setError(
+          "Tidak dapat terhubung ke server API backend. Pastikan NEXT_PUBLIC_API_URL telah diatur di Vercel Environment Variables dan server backend aktif."
+        );
+      } else {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Terjadi kesalahan saat mendaftar.",
+        );
+      }
     } finally {
       setLoading(false);
     }

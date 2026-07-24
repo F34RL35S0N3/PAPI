@@ -21,8 +21,10 @@ export default function LoginPage() {
       formData.append("username", username);
       formData.append("password", password);
 
-      const API_URL =
+      const rawApiUrl =
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const API_URL = rawApiUrl.replace(/\/+$/, "");
+
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: {
@@ -39,7 +41,13 @@ export default function LoginPage() {
       localStorage.setItem("token", data.access_token);
       router.push("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal login. Coba lagi.");
+      if (err instanceof Error && (err.name === "TypeError" || err.message === "Failed to fetch")) {
+        setError(
+          "Tidak dapat terhubung ke server API backend. Pastikan NEXT_PUBLIC_API_URL telah diatur di Vercel Environment Variables dan server backend aktif."
+        );
+      } else {
+        setError(err instanceof Error ? err.message : "Gagal login. Coba lagi.");
+      }
     } finally {
       setLoading(false);
     }
