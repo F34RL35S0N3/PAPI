@@ -73,7 +73,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <div className="p-6 sm:p-8 bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl rounded-3xl">
+          <div className="p-6 sm:p-8 bg-white/75 backdrop-blur-2xl border border-white/80 shadow-2xl shadow-slate-950/25 rounded-3xl">
             <form className="space-y-5" onSubmit={handleLogin}>
               {error && <Notice tone="error">{error}</Notice>}
 
@@ -83,7 +83,7 @@ export default function LoginPage() {
                   required
                   value={username}
                   onChange={(event) => setUsername(event.target.value)}
-                  className="field-input"
+                  className="w-full rounded-xl border border-slate-200/80 bg-white/80 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 backdrop-blur-md transition-all focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/20 font-medium"
                   placeholder="Masukkan username"
                 />
               </Field>
@@ -94,7 +94,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  className="field-input"
+                  className="w-full rounded-xl border border-slate-200/80 bg-white/80 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 backdrop-blur-md transition-all focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/20 font-medium"
                   placeholder="Masukkan password"
                 />
               </Field>
@@ -102,17 +102,17 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="dark-pill w-full py-4 disabled:opacity-50"
+                className="w-full rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-600/30 transition-all hover:from-emerald-500 hover:to-teal-500 hover:shadow-emerald-600/40 active:scale-[0.99] disabled:opacity-50"
               >
                 {loading ? "Memproses..." : "Masuk"}
               </button>
             </form>
 
-            <p className="mt-6 text-center text-sm text-slate-200">
+            <p className="mt-6 text-center text-sm font-medium text-slate-700">
               Belum punya akun?{" "}
               <Link
                 href="/register"
-                className="font-black text-white underline decoration-white/40 underline-offset-4 hover:decoration-white"
+                className="font-bold text-emerald-700 hover:text-emerald-800 underline decoration-emerald-500/30 underline-offset-4 hover:decoration-emerald-600"
               >
                 Daftar sekarang
               </Link>
@@ -131,11 +131,10 @@ function AuthBackground() {
       <img
         src="/bg.jpeg"
         alt="Background"
-        className="absolute inset-0 h-full w-full object-cover filter blur-[4px] scale-105 opacity-80"
+        className="absolute inset-0 h-full w-full object-cover filter blur-[4px] scale-105 opacity-85"
       />
-      {/* Vignette overlay for text readability */}
-      <div className="absolute inset-0 bg-slate-950/45" />
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/60" />
+      {/* Soft overlay */}
+      <div className="absolute inset-0 bg-slate-900/35" />
     </div>
   );
 }
@@ -149,7 +148,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-bold text-slate-200">
+      <span className="mb-2 block text-sm font-bold text-slate-800">
         {label}
       </span>
       {children}
