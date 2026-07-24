@@ -168,7 +168,8 @@ export default function DashboardPage() {
     // Only fetch suggested questions once or separately, as they don't need SSE
     getSuggestedQuestions().then(setSuggestedQuestions).catch(console.error);
 
-    const url = `${getApiUrl()}/api/prices/stream?category=${category}`;
+    const categoryParam = activeCategory === "all" ? "" : activeCategory;
+    const url = `${getApiUrl()}/api/prices/stream?category=${categoryParam}`;
 
     setIsLoading(true);
     const eventSource = new EventSource(url);
